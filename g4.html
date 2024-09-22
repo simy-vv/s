@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>グラフ</title>
+    <style>
+        /* 親要素の設定 */
+        body {
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* グラフを中央上に配置 */
+            flex-direction: column;
+            position: relative;
+        }
+        .graph-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1; /* グラフを上部に配置 */
+        }
+
+        .graph {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px;
+        }
+  　　 .graph2 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin: 0 10px;
+        }
+.container {
+    width: 80px; /* バーの幅を広げる */
+    height: 50vh;
+    border: 2px solid black;
+    position: relative;
+}
+        .rectangle {
+            width: 100%;
+            background-color: lightblue;
+            height: 50%;
+            position: absolute;
+            bottom: 0;
+            transition: height 0.5s;
+        }
+
+
+        .inputValue {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* input要素の幅を狭くする */
+        input {
+            width: 60px;
+            text-align: center;
+        }
+
+        /* Input elements placed at the bottom */
+        .input-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: left;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>グラフ</h1>
+   
+            <button onclick="xy()">スタート</button>
+    <div class="graph-container">
+        <!-- グラフを表示 -->
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue0">50%</div>
+            <div class="container" id="container0">
+                <div class="rectangle" id="rectangle0"></div>
+            </div>
+            <div class="inputValue" id="i0">null</div>
+        </div>   
+
+        <div class="graph">           
+            <div class="inputValue" id="inputValue1">50%</div>
+            <div class="container" id="container1">
+                <div class="rectangle" id="rectangle1"></div>
+            </div>
+            <div class="inputValue" id="i1">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue2">50%</div>
+            <div class="container" id="container2">
+                <div class="rectangle" id="rectangle2"></div>
+            </div>
+            <div class="inputValue" id="i2">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue3">50%</div>
+            <div class="container" id="container3">
+                <div class="rectangle" id="rectangle3"></div>
+            </div>
+            <div class="inputValue" id="i3">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue4">50%</div>
+            <div class="container" id="container4">
+                <div class="rectangle" id="rectangle4"></div>
+            </div>
+            <div class="inputValue" id="i4">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue5">50%</div>
+            <div class="container" id="container5">
+                <div class="rectangle" id="rectangle5"></div>
+            </div>
+            <div class="inputValue" id="i5">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue6">50%</div>
+            <div class="container" id="container6">
+                <div class="rectangle" id="rectangle6"></div>
+            </div>
+            <div class="inputValue" id="i6">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue7">50%</div>
+            <div class="container" id="container7">
+                <div class="rectangle" id="rectangle7"></div>
+            </div>
+            <div class="inputValue" id="i7">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue8">50%</div>
+            <div class="container" id="container8">
+                <div class="rectangle" id="rectangle8"></div>
+            </div>
+            <div class="inputValue" id="i8">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue9">50%</div>
+            <div class="container" id="container9">
+                <div class="rectangle" id="rectangle9"></div>
+            </div>
+            <div class="inputValue" id="i9">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue10">50%</div>
+            <div class="container" id="container10">
+                <div class="rectangle" id="rectangle10"></div>
+            </div>
+            <div class="inputValue" id="i10">null</div>
+        </div>
+    </div>
+
+    <!-- Inputs at the bottom -->
+
+
+    <div class="input-footer"> 
+        <div class="graph2">
+          <div id="currentAmount">粉の量: 0</div> 
+
+            <button onclick="y1()">^^^^^増やす^^^^^</button>
+            <button onclick="y2()">vvvvv減らすvvvvv</button>
+           <button onclick="x2()"><<<<<<左</button>
+           <button onclick="x1()">右>>>>>></button>
+            
+            
+            <label for="wmas">水の量:</label><input type="number" id="wmas" value="10">
+            <label for="wunit">水の単位:</label><input type="text" id="wunit" value="ml">
+            <label for="pmas">粉の量:</label><input type="number" id="pmas" value="10">
+            <label for="punit">粉の単位:</label><input type="text" id="punit" value="mg">
+            <label for="ppmax">粉最大値:</label><input type="number" id="pmax" value="100">
+        </div>
+
+        <div class="graph2">
+            <label for="heightInput1"></label>
+            <input type="number" id="heightInput1" >
+        </div>
+
+        <div class="graph2">
+            <label for="heightInput2"></label>
+            <input type="number" id="heightInput2" >
+            <button onclick="inp0()"></button>
+        </div>      
+    </div>
+
+    <script>
+        
+        var ar=new Array(12);var xx;var pmaxx;
+        function xy(){
+         var wms = document.getElementById('wmas').value;
+         var pms = document.getElementById('pmas').value;
+         pmaxx= parseFloat(document.getElementById('pmax').value);
+　    　  for (let i = 0; i < 11; i++) {  
+          ar[i] =0; 
+          changeHeight(i);
+          document.getElementById('i'+i).textContent=i*wms + document.getElementById("wunit").value;  
+          }
+          xx=0;
+          var nextRectangle = document.getElementById('rectangle' + xx);
+          nextRectangle.style.backgroundColor = 'red';
+　　　　  document.getElementById('inputValue' + xx).style.color = 'red';  
+　　　　　  document.getElementById('i' + xx).style.color = 'red';  
+            var pu = document.getElementById("punit").value;
+           document.getElementById('currentAmount').textContent =  ar[xx] + pu ;
+        }
+
+        function x1(){
+         var rectangle = document.getElementById('rectangle' + xx);
+　　　　  document.getElementById('inputValue' + xx).style.color = 'black';  
+         rectangle.style.backgroundColor = 'lightblue'; 
+　　　　  document.getElementById('i' + xx).style.color = 'black';  
+
+         xx = xx + 1;
+    
+         if (xx > 10) {
+          xx = 10;
+         }
+       
+         var nextRectangle = document.getElementById('rectangle' + xx);
+         nextRectangle.style.backgroundColor = 'red';
+　　　　  document.getElementById('inputValue' + xx).style.color = 'red';  
+　　　　　 document.getElementById('i' + xx).style.color = 'red';  
+         document.getElementById('heightInput2').value=ar[xx];
+         document.getElementById('heightInput1').value=xx;
+            var pu = document.getElementById("punit").value;
+           document.getElementById('currentAmount').textContent =  ar[xx] + pu ;
+        }
+
+        function x2(){
+         var rectangle = document.getElementById('rectangle' + xx);
+         rectangle.style.backgroundColor = 'lightblue'; 
+　　　　  document.getElementById('inputValue' + xx).style.color = 'black';  
+　　　　  document.getElementById('i' + xx).style.color = 'black';  
+
+         xx = xx - 1;
+    
+         if (xx < 0) {
+          xx = 0;
+          }
+       
+         // 次の rectangle の背景色を red に変更
+         var nextRectangle = document.getElementById('rectangle' + xx);
+         nextRectangle.style.backgroundColor = 'red';
+　　　　   document.getElementById('inputValue' + xx).style.color = 'red'; 
+　　　　　 document.getElementById('i' + xx).style.color = 'red';  
+         document.getElementById('heightInput2').value=ar[xx];
+         document.getElementById('heightInput1').value=xx;
+            var pu = document.getElementById("punit").value;
+           document.getElementById('currentAmount').textContent =  ar[xx] + pu ;
+       
+        }
+
+
+        function y1(){
+         var pm = document.getElementById('pmas').value;
+               ar[xx]=parseFloat(ar[xx])+parseFloat(pm)*100/pmaxx;
+            var pu = document.getElementById("punit").value;
+           document.getElementById('currentAmount').textContent =  ar[xx] + pu ;
+   
+　　　　　　　　　changeHeight(xx);
+        } 
+        function y2(){
+         var pm = document.getElementById('pmas').value;
+            var pu = document.getElementById("punit").value;
+               ar[xx]=parseFloat(ar[xx])-parseFloat(pm)*100/pmaxx;
+           document.getElementById('currentAmount').textContent =  ar[xx] + pu ;
+   
+　　　　　　　　　changeHeight(xx);
+        }
+        function changeHeight(graphNumber) {
+            // 入力値を取得
+            var heightInput = document.getElementById('heightInput1').value;
+            
+            //var dd = document.getElementById("d").value;
+            var pm = document.getElementById("pmas").value;
+            var pu = document.getElementById("punit").value;
+            // 対応するグラフと表示領域を取得
+            var rectangle = document.getElementById('rectangle' + graphNumber);
+            var inputValue = document.getElementById('inputValue' + graphNumber);
+            rectangle.style.height = ar[graphNumber] + '%';
+            inputValue.textContent = ar[graphNumber] + pu ;//+       document.getElementById('heightInput4').value; // 入力された数値を表示
+        }
+    </script>
+
+</body>
+</html>
