@@ -49,7 +49,7 @@
         .rectangle {
             width: 100%;
             background-color: lightblue;
-            height: 50%;
+            height: 100%;
             position: absolute;
             bottom: 0;
             transition: height 0.5s;
@@ -99,10 +99,10 @@
             <div class="container" id="container00">
 <div class="rectangle" style="width: 50px; height: 100%; background-image: url('ga.png'); background-size: 100% 100%; background-position: center;"></div>
             </div>
-            <div class="inputValue" id="i00">null</div>
+            <div class="inputValue" id="i00">_</div>
         </div>  
         <div class="graph">
-            <div class="inputValue" id="inputValue0">50%</div>
+            <div class="inputValue" id="inputValue0">100%</div>
             <div class="container" id="container0">
                 <div class="rectangle" id="rectangle0"></div>
             </div>
@@ -110,7 +110,7 @@
         </div>   
 
         <div class="graph">           
-            <div class="inputValue" id="inputValue1">50%</div>
+            <div class="inputValue" id="inputValue1">100%</div>
             <div class="container" id="container1">
                 <div class="rectangle" id="rectangle1"></div>
             </div>
@@ -118,7 +118,7 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue2">50%</div>
+            <div class="inputValue" id="inputValue2">100%</div>
             <div class="container" id="container2">
                 <div class="rectangle" id="rectangle2"></div>
             </div>
@@ -126,7 +126,7 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue3">50%</div>
+            <div class="inputValue" id="inputValue3">100%</div>
             <div class="container" id="container3">
                 <div class="rectangle" id="rectangle3"></div>
             </div>
@@ -134,14 +134,14 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue4">50%</div>
+            <div class="inputValue" id="inputValue4">100%</div>
             <div class="container" id="container4">
                 <div class="rectangle" id="rectangle4"></div>
             </div>
             <div class="inputValue" id="i4">null</div>
         </div>
         <div class="graph">
-            <div class="inputValue" id="inputValue5">50%</div>
+            <div class="inputValue" id="inputValue5">100%</div>
             <div class="container" id="container5">
                 <div class="rectangle" id="rectangle5"></div>
             </div>
@@ -149,7 +149,7 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue6">50%</div>
+            <div class="inputValue" id="inputValue6">100%</div>
             <div class="container" id="container6">
                 <div class="rectangle" id="rectangle6"></div>
             </div>
@@ -157,7 +157,7 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue7">50%</div>
+            <div class="inputValue" id="inputValue7">100%</div>
             <div class="container" id="container7">
                 <div class="rectangle" id="rectangle7"></div>
             </div>
@@ -165,7 +165,7 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue8">50%</div>
+            <div class="inputValue" id="inputValue8">100%</div>
             <div class="container" id="container8">
                 <div class="rectangle" id="rectangle8"></div>
             </div>
@@ -173,14 +173,14 @@
         </div>
 
         <div class="graph">
-            <div class="inputValue" id="inputValue9">50%</div>
+            <div class="inputValue" id="inputValue9">100%</div>
             <div class="container" id="container9">
                 <div class="rectangle" id="rectangle9"></div>
             </div>
             <div class="inputValue" id="i9">null</div>
         </div>
         <div class="graph">
-            <div class="inputValue" id="inputValue10">50%</div>
+            <div class="inputValue" id="inputValue10">100%</div>
             <div class="container" id="container10">
                 <div class="rectangle" id="rectangle10"></div>
             </div>
@@ -200,7 +200,6 @@
             <button onclick="y2()">↓↓↓↓↓減らす↓↓↓↓↓</button>
            <button onclick="x2()"><<<<<<左</button>
            <button onclick="x1()">右>>>>>></button>
-            <button id="en" onclick="set()">終了</button>
             
 
         </div>
@@ -228,7 +227,7 @@
 　　　　   document.getElementById('inputValue' + xx).style.color = 'red';  
 　　　　　  document.getElementById('i' + xx).style.color = 'red';  
             var pu = document.getElementById("punit").value;
-           document.getElementById('currentAmount').textContent =  ar[xx] + pu ;
+          document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
 
         }
 
