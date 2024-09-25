@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" maximum-scale=1.0, user-scalable=no">
+    <title>２０２４年９月２４日A高２年２組数学「グラフ」</title>
+    <style>
+        /* 親要素の設定 */
+        body {
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* グラフを中央上に配置 */
+            flex-direction: column;
+            position: relative;
+        }
+        .graph-container {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1; /* グラフを上部に配置 */
+        }
+
+        .graph {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px;
+        }
+  　　 .graph2 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin: 0 10px;
+        }　 
+       .graph3 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            font-size: 50px;
+
+        }
+      .container {
+       width: 50px; /* バーの幅を広げる */
+       height: 50vh;
+       border: 2px solid black;
+       position: relative;
+       }
+        .rectangle {
+            width: 100%;
+            background-color: lightblue;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            transition: height 0.5s;
+        }
+
+
+        .inputValue {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* input要素の幅を狭くする */
+        input {
+            width: 60px;
+            text-align: center;
+        }
+
+        /* Input elements placed at the bottom */
+        .input-footer {
+            position: absolute;
+            bottom: 10%;
+            width: 100%;
+            display: flex;
+            justify-content: left;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>2024年9月26日A高2年2組数学「グラフ」</h1>
+     <div class="graph2">
+    <button onclick="xy()">!!!!!!!!!スタート!!!!!!!!!</button>
+            <label for="wmas">横軸の量:</label><input type="number" id="wmas" value="1">
+            <label for="wunit">横軸の単位:</label><input type="text" id="wunit" value="日">
+            <label for="pmas">縦軸の量:</label><input type="number" id="pmas" value="1">
+            <label for="punit">縦軸の単位:</label><input type="text" id="punit" value="個">
+            <label for="ppmax">最大値:</label><input type="number" id="pmax" value="100">
+　　　　</div>
+    <div class="graph-container">
+        <!-- グラフを表示 -->
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue00">null</div>
+            <div class="container" id="container00">
+　　　　　　　<div class="rectangle" style="width: 50px; height: 100%; background-image: url('ga2.png'); background-size: 100% 100%; background-position: center;"></div>
+            </div>
+            <div class="inputValue" id="i00">null</div>
+        </div>  
+        <div class="graph">
+            <div class="inputValue" id="inputValue0">100%</div>
+            <div class="container" id="container0">
+                <div class="rectangle" id="rectangle0"></div>
+            </div>
+            <div class="inputValue" id="i0">null</div>
+        </div>   
+
+        <div class="graph">           
+            <div class="inputValue" id="inputValue1">100%</div>
+            <div class="container" id="container1">
+                <div class="rectangle" id="rectangle1"></div>
+            </div>
+            <div class="inputValue" id="i1">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue2">100%</div>
+            <div class="container" id="container2">
+                <div class="rectangle" id="rectangle2"></div>
+            </div>
+            <div class="inputValue" id="i2">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue3">100%</div>
+            <div class="container" id="container3">
+                <div class="rectangle" id="rectangle3"></div>
+            </div>
+            <div class="inputValue" id="i3">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue4">100%</div>
+            <div class="container" id="container4">
+                <div class="rectangle" id="rectangle4"></div>
+            </div>
+            <div class="inputValue" id="i4">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue5">100%</div>
+            <div class="container" id="container5">
+                <div class="rectangle" id="rectangle5"></div>
+            </div>
+            <div class="inputValue" id="i5">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue6">100%</div>
+            <div class="container" id="container6">
+                <div class="rectangle" id="rectangle6"></div>
+            </div>
+            <div class="inputValue" id="i6">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue7">100%</div>
+            <div class="container" id="container7">
+                <div class="rectangle" id="rectangle7"></div>
+            </div>
+            <div class="inputValue" id="i7">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue8">100%</div>
+            <div class="container" id="container8">
+                <div class="rectangle" id="rectangle8"></div>
+            </div>
+            <div class="inputValue" id="i8">null</div>
+        </div>
+
+        <div class="graph">
+            <div class="inputValue" id="inputValue9">100%</div>
+            <div class="container" id="container9">
+                <div class="rectangle" id="rectangle9"></div>
+            </div>
+            <div class="inputValue" id="i9">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue10">100%</div>
+            <div class="container" id="container10">
+                <div class="rectangle" id="rectangle10"></div>
+            </div>
+            <div class="inputValue" id="i10">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue11">100%</div>
+            <div class="container" id="container11">
+                <div class="rectangle" id="rectangle11"></div>
+            </div>
+            <div class="inputValue" id="i11">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue12">100%</div>
+            <div class="container" id="container12">
+                <div class="rectangle" id="rectangle12"></div>
+            </div>
+            <div class="inputValue" id="i12">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue13">100%</div>
+            <div class="container" id="container13">
+                <div class="rectangle" id="rectangle13"></div>
+            </div>
+            <div class="inputValue" id="i13">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue14">100%</div>
+            <div class="container" id="container14">
+                <div class="rectangle" id="rectangle14"></div>
+            </div>
+            <div class="inputValue" id="i14">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue15">100%</div>
+            <div class="container" id="container15">
+                <div class="rectangle" id="rectangle15"></div>
+            </div>
+            <div class="inputValue" id="i15">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue16">100%</div>
+            <div class="container" id="container16">
+                <div class="rectangle" id="rectangle16"></div>
+            </div>
+            <div class="inputValue" id="i16">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue17">100%</div>
+            <div class="container" id="container17">
+                <div class="rectangle" id="rectangle17"></div>
+            </div>
+            <div class="inputValue" id="i17">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue18">100%</div>
+            <div class="container" id="container18">
+                <div class="rectangle" id="rectangle18"></div>
+            </div>
+            <div class="inputValue" id="i18">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue19">100%</div>
+            <div class="container" id="container19">
+                <div class="rectangle" id="rectangle19"></div>
+            </div>
+            <div class="inputValue" id="i19">null</div>
+        </div>
+        <div class="graph">
+            <div class="inputValue" id="inputValue20">100%</div>
+            <div class="container" id="container20">
+                <div class="rectangle" id="rectangle20"></div>
+            </div>
+            <div class="inputValue" id="i20">null</div>
+        </div>
+    </div>
+
+    <!-- Inputs at the bottom -->
+
+
+    <div class="input-footer"> 
+
+         <div class="graph2">
+            <div id="currentAmount"></div>
+       
+            <button onclick="y1()">↑↑↑↑↑増やす↑↑↑↑↑</button>
+            <button onclick="y2()">↓↓↓↓↓減らす↓↓↓↓↓</button>
+           <button onclick="x2()"><<<<<<左</button>
+           <button onclick="x1()">右>>>>>></button>
+            
+
+        </div>
+
+    
+
+    </div>
+
+    <script>
+        
+        var ar=new Array(12);var xx;var pmaxx;
+
+        function xy(){
+         var wms = document.getElementById('wmas').value;
+         var pms = document.getElementById('pmas').value;
+         pmaxx= parseFloat(document.getElementById('pmax').value);
+　　　　　 pp=document.getElementById("punit").value;;
+         document.getElementById('inputValue00').textContent=pp;
+          document.getElementById('i00').textContent=document.getElementById("wunit").value;  
+
+　    　  for (let i = 0; i < 21; i++) {  
+          ar[i] =0; 
+          changeHeight(i);
+          document.getElementById('i'+i).textContent=i*wms + document.getElementById("wunit").value;  
+          }
+          xx=0;
+          var nextRectangle = document.getElementById('rectangle' + xx);
+          nextRectangle.style.backgroundColor = 'red';
+　　　　   document.getElementById('inputValue' + xx).style.color = 'red';  
+　　　　　  document.getElementById('i' + xx).style.color = 'red';  
+            var pu = document.getElementById("punit").value;
+          document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
+
+        }
+
+        function x1(){
+         var rectangle = document.getElementById('rectangle' + xx);
+　　　　  document.getElementById('inputValue' + xx).style.color = 'black';  
+         rectangle.style.backgroundColor = 'lightblue'; 
+　　　　  document.getElementById('i' + xx).style.color = 'black';  
+
+         xx = xx + 1;
+    
+         if (xx > 20) {
+          xx = 20;
+         }
+       
+         var nextRectangle = document.getElementById('rectangle' + xx);
+         nextRectangle.style.backgroundColor = 'red';
+　　　　  document.getElementById('inputValue' + xx).style.color = 'red';  
+　　　　　 document.getElementById('i' + xx).style.color = 'red';  
+
+
+         var pu = document.getElementById("punit").value;
+         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +ar[xx] + pu ;
+  
+        }
+
+        function x2(){
+         var rectangle = document.getElementById('rectangle' + xx);
+         rectangle.style.backgroundColor = 'lightblue'; 
+　　　　  document.getElementById('inputValue' + xx).style.color = 'black';  
+　　　　  document.getElementById('i' + xx).style.color = 'black';  
+
+         xx = xx - 1;
+    
+         if (xx < 0) {
+          xx = 0;
+          }
+       
+         // 次の rectangle の背景色を red に変更
+         var nextRectangle = document.getElementById('rectangle' + xx);
+         nextRectangle.style.backgroundColor = 'red';
+　　　　   document.getElementById('inputValue' + xx).style.color = 'red'; 
+　　　　　 document.getElementById('i' + xx).style.color = 'red';  
+
+
+         var pu = document.getElementById("punit").value;
+         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +ar[xx] + pu ;
+  
+       
+        }
+
+
+        function y1(){
+         
+         var wms = document.getElementById('wmas').value;
+         var pm = document.getElementById('pmas').value;
+         ar[xx]=parseFloat(ar[xx])+parseFloat(pm)/pmaxx;
+         var pu = document.getElementById("punit").value;
+          document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
+　　　　　　　　　changeHeight(xx);
+        } 
+        function y2(){
+         
+         var wms = document.getElementById('wmas').value;
+         var pm = document.getElementById('pmas').value;
+         var pu = document.getElementById("punit").value;
+         ar[xx]=parseFloat(ar[xx])-parseFloat(pm)/pmaxx;
+         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
+
+         　　　changeHeight(xx);
+           
+        }
+        function changeHeight(graphNumber) {
+            // 入力値を取得
+
+            
+            pmaxx= parseFloat(document.getElementById('pmax').value);
+            //var dd = document.getElementById("d").value;
+            var pm = document.getElementById("pmas").value;
+            var pu = document.getElementById("punit").value;
+            // 対応するグラフと表示領域を取得
+            var rectangle = document.getElementById('rectangle' + graphNumber);
+            var inputValue = document.getElementById('inputValue' + graphNumber);
+            rectangle.style.height = ar[graphNumber]*100 + '%';
+            inputValue.textContent = Math.round(ar[graphNumber]*pmaxx) + pu ;//+       document.getElementById('heightInput4').value; // 入力された数値を表示
+        }
+    </script>
+
+</body>
+</html>
