@@ -325,7 +325,7 @@
 
 
          var pu = document.getElementById("punit").value;
-         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +ar[xx] + pu ;
+         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
   
         }
 
