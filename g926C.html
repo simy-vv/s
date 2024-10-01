@@ -350,7 +350,7 @@
 
 
          var pu = document.getElementById("punit").value;
-         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +ar[xx] + pu ;
+         document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
   
        
         }
@@ -372,7 +372,6 @@
          var pu = document.getElementById("punit").value;
          ar[xx]=parseFloat(ar[xx])-parseFloat(pm)/pmaxx;
          document.getElementById('currentAmount').textContent = parseFloat(wms*xx)+ document.getElementById("wunit").value + "のとき" +Math.round(ar[xx]*pmaxx)+ pu ;
-
          　　　changeHeight(xx);
            
         }
