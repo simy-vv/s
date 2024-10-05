@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音声を文字化＆音量計測</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        #output {
+            width: 300px;
+            height: 150px;
+            border: 1px solid #000;
+            padding: 10px;
+            font-size: 1.2rem;
+            overflow-y: auto;
+            margin-right: 20px; /* グラフとの余白 */
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 90%;
+        }
+        #volume {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+        input {
+            width: 100px;
+        }
+        #volumeGraph {
+            border: 1px solid black;
+            width: 300px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1>滑舌と声量　１０月７日</h1>
+    
+    <!-- 横並びのコンテナ -->
+    <div class="container">
+        <!-- 文字化された音声の表示エリア -->
+        <div id="output">ファイト</div>
+
+        <!-- 音量線グラフ -->
+        <canvas id="volumeGraph" width="300" height="150"></canvas>
+    </div>
+    
+    <!-- コントロールエリア -->
+    <div class="controls">
+        <div id="volume">音量: 0 dB</div>
+        <div>
+            <label for="volumeThreshold1">大きすぎ: </label>
+            <input type="number" id="volumeThreshold1" value="60" step="1">
+        </div>
+        <div>
+            <label for="volumeThreshold2">小さすぎ(dB): </label>
+            <input type="number" id="volumeThreshold2" value="80" step="1">
+        </div>
+        <button id="startBtn">スタート</button>
+        <button id="stopBtn">ストップ</button>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const outputDiv = document.getElementById('output');
+        const volumeDiv = document.getElementById('volume');
+        const volumeThresholdInput1 = document.getElementById('volumeThreshold1');
+        const volumeThresholdInput2 = document.getElementById('volumeThreshold2');
+        const canvas = document.getElementById('volumeGraph');
+        const ctx = canvas.getContext('2d');
+        let recognition;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let dataArray = [];  // 音量データを保存する配列
+
+        // Web Speech APIのサポート確認
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';  // 言語を日本語に設定
+            recognition.interimResults = true;  // 中間結果を取得
+            recognition.continuous = true;  // 継続的に認識する
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                outputDiv.textContent = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('エラーが発生しました: ', event.error);
+            };
+
+            recognition.onend = () => {
+                console.log('音声認識が終了しました');
+            };
+
+            // 音量の計測
+            function startVolumeMeter(stream) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                javascriptNode.onaudioprocess = () => {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+
+                    let values = 0;
+                    for (let i = 0; i < array.length; i++) {
+                        values += array[i];
+                    }
+
+                    const average = values / array.length;
+                    const decibels = Math.round(average);
+
+                    // 音量を表示
+                    volumeDiv.textContent = `音量: ${decibels} dB`;
+
+                    // 音量データを保存
+                    dataArray.push(decibels);
+                    if (dataArray.length > canvas.width) {
+                        dataArray.shift();  // 古いデータを削除
+                    }
+
+                    // 線グラフを描画
+                    drawVolumeGraph();
+
+                    // ユーザーが指定した2つの音量閾値を取得
+                    const volumeThreshold1 = parseInt(volumeThresholdInput1.value);
+                    const volumeThreshold2 = parseInt(volumeThresholdInput2.value);
+
+                    // 閾値ラインを描画
+                    drawThresholdLine(volumeThreshold1, 'green');
+                    drawThresholdLine(volumeThreshold2, 'red');
+                };
+            }
+
+            // 音量線グラフを描画する関数
+            function drawVolumeGraph() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);  // キャンバスをクリア
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height - dataArray[0]);  // 最初のポイントに移動
+                for (let i = 1; i < dataArray.length; i++) {
+                    ctx.lineTo(i, canvas.height - dataArray[i]);  // 線を引く
+                }
+                ctx.strokeStyle = 'blue';  // 線の色
+                ctx.stroke();
+            }
+
+            // 閾値ラインを描画する関数
+            function drawThresholdLine(threshold, color) {
+                const linePosition = canvas.height - (threshold * (canvas.height / 100));  // 閾値の位置
+                ctx.beginPath();
+                ctx.moveTo(0, linePosition);
+                ctx.lineTo(canvas.width, linePosition);
+                ctx.strokeStyle = color;  // 線の色
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // スタートボタン
+            startBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    recognition.start();  // 音声認識開始
+                    startVolumeMeter(stream);  // 音量計測開始
+                    console.log('音声認識と音量計測が開始されました');
+                }).catch((error) => {
+                    console.error('マイクアクセスエラー: ', error);
+                    alert('マイクへのアクセスが拒否されました');
+                });
+            });
+
+            // ストップボタン
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();  // 音声認識停止
+                if (audioContext) {
+                    audioContext.close();  // 音量計測停止
+                }
+                console.log('音声認識と音量計測が停止されました');
+            });
+        } else {
+            outputDiv.textContent = 'お使いのブラウザはWeb Speech APIに対応していません。';
+        }
+    </script>
+</body>
+</html>

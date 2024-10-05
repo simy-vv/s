@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音声を文字化＆音量計測</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #output {
+            width: 80%;
+            height: 150px;
+            border: 1px solid #000;
+            padding: 10px;
+            font-size: 1.2rem;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 90%;
+        }
+        #volume {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+        input {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>実習実践トレーニング</h1>
+    
+    <!-- 文字化された音声の表示エリア -->
+    <div id="output">がんばれ</div>
+    
+    <!-- 改行 -->
+    <br>
+
+    <!-- それ以外のコントロールエリア -->
+    <div class="controls">
+        <div id="volume">音量: 0 dB</div>
+        <div>
+            <label for="volumeThreshold">音量指定 (dB): </label>
+            <input type="number" id="volumeThreshold" value="60" step="1">
+        </div>
+        <button id="startBtn">スタート</button>
+        <button id="stopBtn">ストップ</button>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const outputDiv = document.getElementById('output');
+        const volumeDiv = document.getElementById('volume');
+        const volumeThresholdInput = document.getElementById('volumeThreshold');
+        let recognition;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+
+        // Web Speech APIのサポート確認
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';  // 言語を日本語に設定
+            recognition.interimResults = true;  // 中間結果を取得
+            recognition.continuous = true;  // 継続的に認識する
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                outputDiv.textContent = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('エラーが発生しました: ', event.error);
+            };
+
+            recognition.onend = () => {
+                console.log('音声認識が終了しました');
+            };
+
+            // 音量の計測
+            function startVolumeMeter(stream) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                javascriptNode.onaudioprocess = () => {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+
+                    let values = 0;
+                    for (let i = 0; i < array.length; i++) {
+                        values += array[i];
+                    }
+
+                    const average = values / array.length;
+                    const decibels = Math.round(average);
+
+                    // 音量を表示
+                    volumeDiv.textContent = `音量: ${decibels} dB`;
+
+                    // ユーザーが指定した音量閾値を取得
+                    const volumeThreshold = parseInt(volumeThresholdInput.value);
+
+                    // 指定の音量を超えた場合、文字色を赤く変更
+                    if (decibels > volumeThreshold) {
+                        volumeDiv.style.color = 'red';  // 音量が閾値を超えたら文字を赤く
+                    } else {
+                        volumeDiv.style.color = 'black';  // 音量が閾値以下なら黒に戻す
+                    }
+                };
+            }
+
+            // スタートボタン
+            startBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    recognition.start();  // 音声認識開始
+                    startVolumeMeter(stream);  // 音量計測開始
+                    console.log('音声認識と音量計測が開始されました');
+                }).catch((error) => {
+                    console.error('マイクアクセスエラー: ', error);
+                    alert('マイクへのアクセスが拒否されました');
+                });
+            });
+
+            // ストップボタン
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();  // 音声認識停止
+                if (audioContext) {
+                    audioContext.close();  // 音量計測停止
+                }
+                console.log('音声認識と音量計測が停止されました');
+            });
+        } else {
+            outputDiv.textContent = 'お使いのブラウザはWeb Speech APIに対応していません。';
+        }
+    </script>
+</body>
+</html>
