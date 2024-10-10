@@ -174,7 +174,8 @@
                         // ChatGPTの返答を音声で再生
                         aiSpeaking = true; // AIが発話中であることを示す
                         recognition.stop(); // AIが発話する間、音声認識を停止
-                        const utterance = new SpeechSynthesisUtterance(chatResponse);
+                        const utterance = new SpeechSynthesisUtterance();
+                        utterance.text=chatResponse;
                         window.speechSynthesis.speak(utterance);
                     //  utterance.onend = () => {
                             aiSpeaking = false; // 発話が終わったらフラグをリセット
