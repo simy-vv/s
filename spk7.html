@@ -76,8 +76,8 @@
 
     <!-- 音声認識結果とChatGPTレスポンス表示エリア -->
     <div class="container">
-        <div id="output"></div>
-        <div id="response"></div>
+        <div id="output">ここに音声認識結果が表示されます</div>
+        <div id="response">ここにChatGPTのレスポンスが表示されます</div>
     </div>
     
     <!-- 音量波形表示エリア -->
@@ -85,15 +85,13 @@
     
     <!-- コントロールエリア -->
     <div class="controls">
-        <button id="startBtn">スタート</button>
-        <button id="stopBtn">ストップ</button>
-        <button id="playVoiceBtn" disabled>音声再生</button> <!-- 音声再生ボタン -->
+        <button id="startBtn">音声認識開始</button> <!-- 音声認識ボタン -->
+        <button id="sendBtn" disabled>クエリ送信</button> <!-- クエリ送信ボタン -->
     </div>
 
     <script>
         const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const playVoiceBtn = document.getElementById('playVoiceBtn'); // 音声再生ボタン
+        const sendBtn = document.getElementById('sendBtn'); // クエリ送信ボタン
         const outputDiv = document.getElementById('output');
         const responseDiv = document.getElementById('response');
         const apiKeyInput = document.getElementById('apiKeyInput');
@@ -111,6 +109,7 @@
         let currentDecibels = 0; // 現在の音量レベル
         let aiSpeaking = false; // AIが発話中かどうかを判別
         let chatResponse = ''; // 音声再生用に保持
+        let transcript = ''; // 音声認識結果を保持
 
         // Web Speech APIのサポート確認
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -121,19 +120,45 @@
             recognition.continuous = true;  // 継続的に認識する
 
             recognition.onresult = (event) => {
-                let transcript = '';
+                transcript = ''; // 音声認識結果をクリア
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     transcript += event.results[i][0].transcript;
                 }
                 outputDiv.textContent = transcript;
+                sendBtn.disabled = false; // 音声認識結果があればクエリ送信ボタンを有効に
+            };
 
-                // AIが発話中の場合、クエリを送信しない
-                if (aiSpeaking) {
-                    console.log("AIが発話中です。クエリは送信されません。");
-                    return;
+            recognition.onerror = (event) => {
+                if (event.error === 'no-speech') {
+                    console.warn("音声が検出されませんでした。再度話しかけてください。");
+                    recognition.start(); // no-speechエラーが発生した場合、音声認識を再開
+                } else {
+                    console.error('エラーが発生しました: ', event.error);
+                    responseDiv.textContent = `認識エラー: ${event.error}`;
                 }
+            };
 
-                // 音量が閾値の範囲内か確認
+            recognition.onend = () => {
+                if (!aiSpeaking) {
+                    recognition.start(); // 音声認識が停止した場合でも、AIが話していない場合は再開
+                }
+                console.log('音声認識が終了しました');
+            };
+
+            startBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    recognition.start();
+                    startVolumeMeter(stream);  // 音量計測を開始
+                    console.log('音声認識と音量計測が開始されました');
+                }).catch((error) => {
+                    console.error('マイクアクセスエラー: ', error);
+                    alert('マイクへのアクセスが拒否されました');
+                });
+            });
+
+            // クエリ送信ボタンのイベントリスナー
+            sendBtn.addEventListener('click', () => {
+                // クエリを送信する際に、音量閾値をチェックする
                 const thresholdLow = parseInt(thresholdLowInput.value, 10);
                 const thresholdHigh = parseInt(thresholdHighInput.value, 10);
 
@@ -174,8 +199,18 @@
                         chatResponse = data.choices[0].message.content;
                         responseDiv.textContent = chatResponse;
 
-                        // 音声再生ボタンを有効にする
-                        playVoiceBtn.disabled = false;
+                        // 音声再生
+                        const utterance = new SpeechSynthesisUtterance(chatResponse);
+                        utterance.onend = () => {
+                            aiSpeaking = false;  // 発話終了後にAIの発話フラグをリセット
+                            recognition.start();  // 音声認識を再開
+                        };
+                        window.speechSynthesis.speak(utterance);
+                        aiSpeaking = true;  // 発話開始時にAIの発話フラグをセット
+                        recognition.stop();  // 発話中は音声認識
+
+
+                                                  recognition.stop();  // 発話中は音声認識を一時停止
                     })
                     .catch(error => {
                         responseDiv.textContent = `Error: ${error.message}`;
@@ -184,56 +219,9 @@
                 } else {
                     console.log('音量が閾値範囲外のため、クエリは送信されませんでした。');
                 }
-            };
 
-            recognition.onerror = (event) => {
-                if (event.error === 'no-speech') {
-                    console.warn("音声が検出されませんでした。再度話しかけてください。");
-                    recognition.start(); // no-speechエラーが発生した場合、音声認識を再開
-                } else {
-                    console.error('エラーが発生しました: ', event.error);
-                    responseDiv.textContent = `認識エラー: ${event.error}`;
-                }
-            };
-
-            recognition.onend = () => {
-                if (!aiSpeaking) {
-                    recognition.start(); // 音声認識が停止した場合でも、AIが話していない場合は再開
-                }
-                console.log('音声認識が終了しました');
-            };
-
-            startBtn.addEventListener('click', () => {
-                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-                    recognition.start();
-                    startVolumeMeter(stream);  // 音量計測を開始
-                    console.log('音声認識と音量計測が開始されました');
-                }).catch((error) => {
-                    console.error('マイクアクセスエラー: ', error);
-                    alert('マイクへのアクセスが拒否されました');
-                });
-            });
-
-            stopBtn.addEventListener('click', () => {
-                recognition.stop();
-                if (audioContext) {
-                    audioContext.close();  // 音量計測を停止
-                }
-                console.log('音声認識と音量計測が停止されました');
-            });
-
-            // 音声再生ボタンのイベントリスナー
-            playVoiceBtn.addEventListener('click', () => {
-                if (chatResponse) {
-                    const utterance = new SpeechSynthesisUtterance(chatResponse);
-                    utterance.onend = () => {
-                        aiSpeaking = false;  // 発話終了後にAIの発話フラグをリセット
-                        recognition.start();  // 音声認識を再開
-                    };
-                    window.speechSynthesis.speak(utterance);
-                    aiSpeaking = true;  // 発話開始時にAIの発話フラグをセット
-                    playVoiceBtn.disabled = true;  // 音声再生後、ボタンを無効化
-                }
+                // クエリ送信後、ボタンを無効化
+                sendBtn.disabled = true;
             });
 
             // 音量計測の開始
