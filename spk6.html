@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>spk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        #output, #response {
+            width: 300px;
+            height: 150px;
+            border: 1px solid #000;
+            padding: 10px;
+            font-size: 1.2rem;
+            overflow-y: auto;
+            margin-right: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 90%;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+        input {
+            width: 200px;
+        }
+        canvas {
+            border: 1px solid black;
+            width: 300px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1>2024年11月A高２年２組実習事後学習</h1>
+    
+    <!-- APIキー入力エリア -->
+    <div class="controls">
+        <input type="password" id="apiKeyInput" placeholder="認証">
+    </div>
+    
+    <!-- 閾値入力エリア -->
+    <div class="controls">
+        <label for="thresholdLow">下限: </label>
+        <input type="number" id="thresholdLow" value="30">
+        <label for="thresholdHigh">上限: </label>
+        <input type="number" id="thresholdHigh" value="80">
+    </div>
+    
+    <!-- トークン数指定エリア -->
+    <div class="controls">
+        <label for="maxTokens">文字数: </label>
+        <input type="number" id="maxTokens" value="100">
+    </div>
+
+    <!-- 音声認識結果とChatGPTレスポンス表示エリア -->
+    <div class="container">
+        <div id="output"></div>
+        <div id="response"></div>
+    </div>
+    
+    <!-- 音量波形表示エリア -->
+    <canvas id="volumeGraph" width="300" height="150"></canvas>
+    
+    <!-- コントロールエリア -->
+    <div class="controls">
+        <button id="startBtn">スタート</button>
+        <button id="stopBtn">ストップ</button>
+        <button id="speakBtn">レスポンスを音声で再生</button> <!-- 音声再生ボタン -->
+        <button id="queryBtn">クエリを送信</button> <!-- クエリ送信ボタン -->
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const speakBtn = document.getElementById('speakBtn');  // 音声再生ボタン
+        const queryBtn = document.getElementById('queryBtn');  // クエリ送信ボタン
+        const outputDiv = document.getElementById('output');
+        const responseDiv = document.getElementById('response');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const thresholdLowInput = document.getElementById('thresholdLow');
+        const thresholdHighInput = document.getElementById('thresholdHigh');
+        const maxTokensInput = document.getElementById('maxTokens');
+        const canvas = document.getElementById('volumeGraph');
+        const ctx = canvas.getContext('2d');
+        let recognition;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let dataArray = [];
+        let currentDecibels = 0;
+        let aiSpeaking = false;
+        let chatResponse = ''; // グローバル変数に変更
+        let transcript = ''; // クエリ送信用の変数
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP'; 
+            recognition.interimResults = false;  
+            recognition.continuous = true;  
+
+            recognition.onresult = (event) => {
+                transcript = ''; // 初期化
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                outputDiv.textContent = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                if (event.error === 'no-speech') {
+                    recognition.start();
+                }
+            };
+
+            recognition.onend = () => {
+                if (!aiSpeaking) {
+                    recognition.start();
+                }
+            };
+
+            startBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    recognition.start();
+                    startVolumeMeter(stream);
+                }).catch((error) => {
+                    alert('マイクへのアクセスが拒否されました');
+                });
+            });
+
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();
+                if (audioContext) {
+                    audioContext.close();
+                }
+            });
+
+            speakBtn.addEventListener('click', () => {  // 音声再生ボタン
+                if (chatResponse) {
+                    const utterance = new SpeechSynthesisUtterance(chatResponse);
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert('音声を再生するためのレスポンスがありません');
+                }
+            });
+
+            queryBtn.addEventListener('click', () => {  // クエリ送信ボタン
+                if (!transcript) {
+                    alert('送信するクエリがありません');
+                    return;
+                }
+
+                const apiKey = apiKeyInput.value;
+                if (!apiKey) {
+                    alert('APIキーを入力してください');
+                    return;
+                }
+
+                const maxTokens = parseInt(maxTokensInput.value, 10);
+
+                fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4',
+                        messages: [
+                            { role: 'user', content: transcript },
+                            { role: 'system', content: `日本語で回答してください。${maxTokens}文字以内で回答します。` }
+                        ],
+                        max_tokens: maxTokens
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    chatResponse = data.choices[0].message.content;  // グローバル変数に保存
+                    responseDiv.textContent = chatResponse;
+                    recognition.start();  // クエリ送信後に音声認識を再開
+                })
+                .catch(error => {
+                    responseDiv.textContent = `Error: ${error.message}`;
+                });
+            });
+
+            function startVolumeMeter(stream) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                javascriptNode.onaudioprocess = () => {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+
+                    let values = 0;
+                    for (let i = 0; i < array.length; i++) {
+                        values += array[i];
+                    }
+
+                    const average = values / array.length;
+                    currentDecibels = Math.round(average);
+
+                    dataArray.push(currentDecibels);
+                    if (dataArray.length > canvas.width) {
+                        dataArray.shift();
+                    }
+
+                    drawVolumeGraph();
+                };
+
+                requestAnimationFrame(updateGraph);
+            }
+
+            function updateGraph() {
+                drawVolumeGraph();
+                requestAnimationFrame(updateGraph);
+            }
+
+            function drawVolumeGraph() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height - dataArray[0]);
+                for (let i = 1; i < dataArray.length; i++) {
+                    ctx.lineTo(i, canvas.height - dataArray[i]);
+                }
+                ctx.strokeStyle = 'blue';
+                ctx.stroke();
+
+                const thresholdLow = parseInt(thresholdLowInput.value, 10);
+                               const lowThresholdY = canvas.height - (thresholdLow / 100) * canvas.height;
+                ctx.beginPath();
+                ctx.moveTo(0, lowThresholdY);
+                ctx.lineTo(canvas.width, lowThresholdY);
+                ctx.strokeStyle = 'red';
+                ctx.stroke();
+
+                const thresholdHigh = parseInt(thresholdHighInput.value, 10);
+                const highThresholdY = canvas.height - (thresholdHigh / 100) * canvas.height;
+                ctx.beginPath();
+                ctx.moveTo(0, highThresholdY);
+                ctx.lineTo(canvas.width, highThresholdY);
+                ctx.strokeStyle = 'green';
+                ctx.stroke();
+            }
+
+        } else {
+            outputDiv.textContent = 'お使いのブラウザはWeb Speech APIに対応していません。';
+        }
+    </script>
+</body>
+</html>
