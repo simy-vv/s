@@ -127,9 +127,9 @@
                 }
                 outputDiv.textContent = transcript;
 
-                // AIの発言中はクエリを送信しない
+                // AIが発話中の場合、クエリを送信しない
                 if (aiSpeaking) {
-                    console.log("AIの発話中のため、クエリは送信されません。");
+                    console.log("AIが発話中です。クエリは送信されません。");
                     return;
                 }
 
@@ -141,7 +141,7 @@
                     // APIキーを取得
                     const apiKey = apiKeyInput.value;
                     if (!apiKey) {
-                        alert('APIキー');
+                        alert('APIキーを入力してください。');
                         return;
                     }
 
@@ -159,7 +159,7 @@
                             model: 'gpt-4',
                             messages: [
                                 { role: 'user', content: transcript },
-                                { role: 'system', content: `日本語で回答してください。クエリの文法が正しくないときは正しい文法に直してuserに返してください。${maxTokensInput.value}以内の文字数で回答します`  }
+                                { role: 'system', content: `日本語で回答してください。クエリの文法が正しくないときは正しい文法に直してuserに返してください。${maxTokensInput.value}以内の文字数で回答します。` }
                             ],
                             max_tokens: maxTokens // トークン数を使用
                         })
@@ -208,7 +208,7 @@
                     recognition.start();
                     startVolumeMeter(stream);  // 音量計測を開始
                     console.log('音声認識と音量計測が開始されました');
-                               }).catch((error) => {
+                }).catch((error) => {
                     console.error('マイクアクセスエラー: ', error);
                     alert('マイクへのアクセスが拒否されました');
                 });
