@@ -175,11 +175,12 @@
                         aiSpeaking = true; // AIが発話中であることを示す
                         recognition.stop(); // AIが発話する間、音声認識を停止
                         const utterance = new SpeechSynthesisUtterance(chatResponse);
-                        utterance.onend = () => {
+                        window.speechSynthesis.speak(utterance)
+                       // utterance.onend = () => {
                             aiSpeaking = false; // 発話が終わったらフラグをリセット
                             recognition.start(); // 音声認識を再開
-                        };
-                        window.speechSynthesis.speak(utterance);
+                      //  };
+                        //window.speechSynthesis.speak(utterance);
                     })
                     .catch(error => {
                         responseDiv.textContent = `Error: ${error.message}`;
