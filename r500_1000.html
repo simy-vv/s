@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全金種</title>
+    <script>
+         var inp;
+            inp=0;
+
+//???????????????????????????????????????????????????
+　　　　　var v4,v3,v2,v1,v5,i1,i2,i3,i4,i5;v0;i0;
+　　　　
+       function ba(){
+
+            var image10 = document.getElementById('image10');
+            var image100 = document.getElementById('image100');
+            var image1000 = document.getElementById('image1000');
+            var image10000 = document.getElementById('image10000');
+            var image0 = document.getElementById('image0');
+            image0.src="0.png";
+            image10.src="0.png";
+            image100.src="0.png";
+            image1000.src="0.jpg";
+            image10000.src="0.jpg";
+            var im1 = document.getElementById('i1');
+            var im10 = document.getElementById('i10');
+            var im100 = document.getElementById('i100');
+            var im1000 = document.getElementById('i1000');
+            var im10000 = document.getElementById('i10000');
+            
+            im1.src="0.png";im10.src="0.png";im100.src="0.png";im1000.src="0.png";im10000.src="0.png";
+　　　　　　  
+            var bv = document.getElementById("bak");
+             inp=Number(bv.textContent);
+            One(inp);
+            var un = document.getElementById("nu");
+            un.value=inp;
+           var mar=document.getElementById('maru');
+            mar.src="0.png";
+            
+            const bb = document.getElementById('bac');
+           bb.disabled = true;
+
+            const pppy = document.getElementById('ppy');
+            pppy.disabled = false;
+          }
+
+function crcr(){
+
+   // <button id="ppy" onclick="pay()">!!!!支払い!!!!!</button>
+   // <button id="ccr" onclick="cra()">！！！スタート！！！</button><br>
+   // <button id="bac" onclick="ba()">！！！もどる！！！</button><br>
+   // <button id="cccr" onclick="crcr()">！！！やり直し！！！</button><br>
+            document.getElementById('ppy').disabled = false;
+            document.getElementById('ccr').disabled = true;
+            document.getElementById('bac').disabled = true;
+            document.getElementById('cccr').disabled= false;
+            var mar=document.getElementById('maru');
+            mar.src="0.png";
+            inp=0;
+            var un = document.getElementById("nu");un.value=inp;
+            var bv = document.getElementById("bak");
+            bv.textContent =String(inp);
+            One(inp);
+}
+        function addOne(wa) {
+            
+            const bb = document.getElementById('bac');
+           bb.disabled = false;
+            var bv = document.getElementById("bak");
+            bv.textContent =String(inp);
+            var inp2;inp2=0;
+            var inp3;inp3=0;
+            var inp4;inp4=0;
+            var inp1;inp1=0;
+            var inp0;inp0=0;
+            var image= document.getElementById('image0');
+            var image10 = document.getElementById('image10');
+            var image100 = document.getElementById('image100');
+            var image1000 = document.getElementById('image1000');
+            var image10000 = document.getElementById('image10000');
+            var maru = document.getElementById('maru');
+            var inputElement = document.getElementById("numberInput");
+            var un = document.getElementById("nu");
+
+            inp=inp+wa;
+
+            inp4=inp;
+            inp4=(inp-(inp%10000));
+            if(v4!=inp4){image10000.src=String(inp4)+".jpg";v4=inp4;}//if(inp4===0){image10000.height=0;image10000.widht=0;}}
+
+            inp3=inp-inp4;
+            inp3=(inp3-(inp3%1000));
+            if(v3!=inp3){image1000.src=String(inp3)+".jpg";v3=inp3;}//if(inp3===0){image1000.height=0;image1000.widht=0;}}
+
+            inp2=inp-inp3-inp4;
+            inp2=(inp2-(inp2%100));
+            if(v2!=inp2){image100.src=String(inp2)+".png";v2=inp2;}//if(inp2===0){image100.height=0;image100.widht=0;}}
+
+            inp1=inp-inp2-inp3-inp4;
+            inp1=(inp1-(inp1%10));
+            if(v1!=inp1){image10.src=String(inp1)+".png";v1=inp1;}//if(inp1===0){image10.height=0;image10.widht=0;}}
+
+            inp0=inp-inp1-inp2-inp3-inp4;
+            //inp0=(inp0-(inp0%1));
+            if(v0!=inp0){image.src=String(inp0)+".png";v0=inp0;}//if(inp0===0){image.height=0;image.widht=0;}}
+
+            un.value=inp;//inp
+            
+        }   
+
+
+        function One(wa) {
+            var inp2;inp2=0;
+            var inp3;inp3=0;
+            var inp4;inp4=0;
+            var inp1;inp1=0;
+            var inp0;inp0=0;
+            var image= document.getElementById('image0');
+            var image10 = document.getElementById('image10');
+            var image100 = document.getElementById('image100');
+            var image1000 = document.getElementById('image1000');
+            var image10000 = document.getElementById('image10000');
+            var maru = document.getElementById('maru');
+            var inputElement = document.getElementById("numberInput");
+            var un = document.getElementById("nu");
+            v1=0;v1=0;
+            var inpz;
+            inpz=wa;
+            
+            un.value=inpz;
+
+
+            inp4=inpz;
+            inp4=(inpz-(inpz%10000));
+            image10000.src=String(inp4)+".jpg";
+
+            inp3=inpz-inp4;
+            inp3=(inp3-(inp3%1000));
+            image1000.src=String(inp3)+".jpg";
+
+            inp2=inpz-inp3-inp4;
+            inp2=(inp2-(inp2%100));
+            image100.src=String(inp2)+".png";
+
+            inp1=inpz-inp2-inp3-inp4;
+            inp1=(inp1-(inp1%10));
+            image10.src=String(inp1)+".png";
+
+            inp0=inpz-inp1-inp2-inp3-inp4;
+            image.src=String(inp0)+".png";
+
+        }   
+
+
+        function cra() {
+            // インプット要素を取得
+            
+            const pppy = document.getElementById('ppy');
+            pppy.disabled = false;
+            const bccr = document.getElementById('ccr');
+            // ボタンのテキストを変更
+            bccr.innerHTML = '＠次の問題＠';bccr.disabled = true;
+            
+            const bb = document.getElementById('bac');
+            bb.disabled = true;
+            v1=0;v2=0;v3=0;v4=0;v5=0;v0=0;i1=0;i2=0;i3=0;i4=0;i5=0;
+            var image10 = document.getElementById('image10');
+            var image100 = document.getElementById('image100');
+            var image1000 = document.getElementById('image1000');
+            var image10000 = document.getElementById('image10000');
+            var image0 = document.getElementById('image0');
+            image0.src="0.png";
+            image10.src="0.png";
+            image100.src="0.png";
+            var mar = document.getElementById('maru');
+            var un = document.getElementById("nu");
+            const inputElement = document.getElementById("numberInput");
+            inp=0;
+            inputElement.value=0
+            mar.src="0.png";
+　　　　　　　un.value=""//0
+             image1000.src="0.jpg";
+             image10000.src="0.jpg";
+
+　　　　　　　inputElement.value = Math.round(Math.random()*10000);
+            var im1 = document.getElementById('i1');
+            var im10 = document.getElementById('i10');
+            var im100 = document.getElementById('i100');
+            var im1000 = document.getElementById('i1000');
+            var im10000 = document.getElementById('i10000');
+            
+            im1.src="0.png";im10.src="0.png";im100.src="0.png";im1000.src="0.png";im10000.src="0.png";
+　　　　　　　
+        }      
+
+
+  
+　　　　　function pay(){
+           var mar=document.getElementById('maru');
+           var inputElement = document.getElementById("numberInput");
+           if (inputElement.value <= inp){
+　　　　　　　mar.src="maru.png";
+　　　       var inp00;inp00=0;
+            var inp2;inp2=0;
+            var inp3;inp3=0;
+            var inp4;inp4=0;
+            var inp1;inp1=0;
+            var inp0;inp0=0;
+            var image1 = document.getElementById('i1');
+            var image10 = document.getElementById('i10');
+            var image100 = document.getElementById('i100');
+            var image1000 = document.getElementById('i1000');
+            var image10000 = document.getElementById('i10000');
+　　　　　
+            inp00=inp-inputElement.value;
+            inp4=inp00;
+            inp4=(inp00-(inp00%10000));
+            image10000.src=String(inp4)+".jpg";
+
+            inp3=inp00-inp4;
+            inp3=(inp3-(inp3%1000));
+            image1000.src=String(inp3)+".jpg";
+
+            inp2=inp00-inp3-inp4;
+            inp2=(inp2-(inp2%100));
+            image100.src=String(inp2)+".png";
+
+            inp1=inp00-inp2-inp3-inp4;
+            inp1=(inp1-(inp1%10));
+            image10.src=String(inp1)+".png";
+
+            inp0=inp00-inp1-inp2-inp3-inp4;
+            //inp0=(inp0-(inp0%10));
+            image1.src=String(inp0)+".png";
+
+            const bccr = document.getElementById('ccr');
+            bccr.disabled = false;
+            const pppy = document.getElementById('ppy');
+            pppy.disabled = true;
+　　　　　　　}
+           if (inputElement.value > inp){mar.src="batu.png";}
+            
+            // ボタンのテキストを変更
+        }
+    </script>
+</head>
+<body>
+<style>
+input[type="number"]{
+    font-size: 200%;
+    width=100;
+}
+</style>
+    <div>２０２４年９月10日の課題</div>
+    <label for="numberInput" width="auto" height="200">金額を入力(円)
+    <input type="number" id="numberInput" value="0"><br>
+    <button onclick="addOne(500)" width="auto" height="200"><img id="im500" src="500.png" alt="画像1"width="auto" height="70"></button>
+    <button onclick="addOne(1000)" width="auto" height="200"><img id="im1000" src="1000.jpg" alt="画像1"width="auto" height="70"></button>
+    <button onclick="addOne(5000)" width="auto" height="200"><img id="im5000" src="5000.jpg" alt="画像1"width="auto" height="70"></button><br>
+    <img id="image1000" src="0.png" alt="画像1"width="auto" height="70">
+    <img id="image10000" src="0.png" alt="画像1"width="auto" height="70">
+    <img id="image100" src="0.png" alt="画像1"width="auto" height="70">
+    <img id="image10" src="0.png" alt="画像1" width="auto" height="70">
+    <img id="image0" src="0.png" alt="画像1" width="auto" height="70"><br>
+    <button id="ppy" onclick="pay()">!!!!支払い!!!!!</button>
+    <button id="ccr" onclick="cra()">!!スタート!!</button>
+    <button id="bac" onclick="ba()">!!もどる!!</button>
+    <button id="cccr" onclick="crcr()">!!やり直し!!</button><br>
+   
+　　<div>お釣り</div><br>
+    <img id="i100" src="0.png"  style="opacity: 0.3;"　  alt="画像1"width="auto" height="70">
+    <img id="i10" src="0.png"　 style="opacity: 0.3;"    alt="画像1"width="auto" height="70">
+    <img id="i1" src="0.png"　 style="opacity: 0.3;"    alt="画像1"width="auto" height="70">
+    <img id="i1000" src="0.png"　 style="opacity: 0.3;"   alt="画像1"width="auto" height="70">
+    <img id="i10000" src="0.png"　 style="opacity: 0.3;"  alt="画像1"width="auto" height="70">
+ <img id="maru" src="0.png" alt="画像1"width="auto" height="200">
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <input type="number" id="nu" value="0"><br><div id="bak" style="color: blue;">元のテキスト</div>
+</body>
+</html>
