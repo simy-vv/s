@@ -28,13 +28,13 @@
     </style>
 </head>
 <body>
-    <h1>青いラインの表示と消去</h1>
-    <p>「許可」を押してマイクにアクセスを許可してください。</p>
+    <h1>声を視覚化しよう</h1>
+    <p>A部門高等部2年　国語</p>
     <canvas id="spectrum" width="800" height="400"></canvas>
     <p id="status">マイクが準備中です...</p>
     <p id="message"></p>
-    <button id="saveToLocal">ローカルストレージに保存</button>
-    <button id="loadAndDisplay">保存データを表示</button>
+    <button id="saveToLocal">保存</button>
+    <button id="loadAndDisplay">保存データ表示</button>
     <button id="clearBlueLine">青いラインを消す</button>
 
     <script>
@@ -72,14 +72,14 @@
                 // ピークデータを保存する
                 document.getElementById("saveToLocal").addEventListener("click", () => {
                     saveToLocalStorage(peakData);
-                    showMessage("ピークデータをローカルストレージに保存しました！");
+                    showMessage("ピークデータを保存");
                 });
 
                 // 保存データを表示する
                 document.getElementById("loadAndDisplay").addEventListener("click", () => {
                     loadedData = loadFromLocalStorage();
                     if (loadedData) {
-                        showMessage("保存データを青いラインで表示しました！");
+                        showMessage("保存データを青いラインで表示します");
                     } else {
                         showMessage("保存されたデータがありません！");
                     }
@@ -88,7 +88,7 @@
                 // 青いラインを消す
                 document.getElementById("clearBlueLine").addEventListener("click", () => {
                     loadedData = null;
-                    showMessage("青いラインを消しました！");
+                    showMessage("青いラインを消します");
                 });
 
                 function updatePeakData() {
