@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青いラインの表示と消去</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            display: block;
+            margin: 20px auto;
+            background-color: white;
+        }
+        #status {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        button {
+            font-size: 16px;
+            margin: 5px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>青いラインの表示と消去</h1>
+    <p>「許可」を押してマイクにアクセスを許可してください。</p>
+    <canvas id="spectrum" width="800" height="400"></canvas>
+    <p id="status">マイクが準備中です...</p>
+    <button id="saveToLocal">ローカルストレージに保存</button>
+    <button id="loadAndDisplay">保存データを表示</button>
+    <button id="clearBlueLine">青いラインを消す</button>
+
+    <script>
+        async function setupAudio() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+
+                const microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                const peakData = loadFromLocalStorage() || new Uint8Array(bufferLength); // 保存データをロード
+                const peakTimestamps = new Array(bufferLength).fill(0); // ピーク値のタイムスタンプ
+                let loadedData = null; // 表示する保存済みデータ
+
+                const canvas = document.getElementById('spectrum');
+                const canvasCtx = canvas.getContext('2d');
+                const canvasHeight = canvas.height;
+                const canvasWidth = canvas.width;
+
+                // ピークデータを保存する
+                document.getElementById("saveToLocal").addEventListener("click", () => {
+                    saveToLocalStorage(peakData);
+                    alert("ピークデータをローカルストレージに保存しました！");
+                });
+
+                // 保存データを表示する
+                document.getElementById("loadAndDisplay").addEventListener("click", () => {
+                    loadedData = loadFromLocalStorage();
+                    if (loadedData) {
+                        alert("保存データを青いラインで表示しました！");
+                    } else {
+                        alert("保存されたデータがありません！");
+                    }
+                });
+
+                // 青いラインを消す
+                document.getElementById("clearBlueLine").addEventListener("click", () => {
+                    loadedData = null;
+                    alert("青いラインを消しました！");
+                });
+
+                function updatePeakData() {
+                    const currentTime = Date.now();
+
+                    for (let i = 0; i < bufferLength; i++) {
+                        if (dataArray[i] > peakData[i]) {
+                            peakData[i] = dataArray[i];
+                            peakTimestamps[i] = currentTime;
+                        } else if (currentTime - peakTimestamps[i] > 5000) {
+                            peakData[i] = 0; // 5秒間保持
+                        }
+                    }
+                }
+
+                function draw() {
+                    analyser.getByteFrequencyData(dataArray);
+                    updatePeakData();
+
+                    canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                    const barWidth = canvasWidth / bufferLength;
+                    let barHeight;
+                    let peakHeight;
+                    let x = 0;
+
+                    for (let i = 0; i < bufferLength; i++) {
+                        barHeight = dataArray[i] / 256 * (canvasHeight - 40);
+                        peakHeight = peakData[i] / 256 * (canvasHeight - 40);
+
+                        // スペクトラムバー
+                        canvasCtx.fillStyle = "black";
+                        canvasCtx.fillRect(x, canvasHeight - barHeight - 40, barWidth, barHeight);
+
+                        // ピークライン（赤を太く）
+                        if (peakData[i] > 0) {
+                            canvasCtx.fillStyle = "red";
+                            canvasCtx.fillRect(x, canvasHeight - peakHeight - 40 - 5, barWidth, 5);
+                        }
+
+                        // 保存データライン（青）
+                        if (loadedData && loadedData[i] > 0) {
+                            const savedHeight = loadedData[i] / 256 * (canvasHeight - 40);
+                            canvasCtx.fillStyle = "blue";
+                            canvasCtx.fillRect(x, canvasHeight - savedHeight - 40 - 5, barWidth, 5);
+                        }
+
+                        x += barWidth + 1;
+                    }
+
+                    // X軸（周波数ラベル）を描画
+                    const nyquist = audioContext.sampleRate / 2;
+                    canvasCtx.fillStyle = "black";
+                    canvasCtx.font = "12px Arial";
+                    canvasCtx.textAlign = "center";
+
+                    for (let i = 0; i <= 5; i++) {
+                        const freq = Math.round((i / 5) * nyquist);
+                        const labelX = (i / 5) * canvasWidth;
+                        canvasCtx.fillText(`${freq} Hz`, labelX, canvasHeight - 10);
+                    }
+                }
+
+                function loop() {
+                    draw();
+                    requestAnimationFrame(loop);
+                }
+
+                document.getElementById('status').textContent = "マイクが有効になりました。声を出してください！";
+                loop();
+            } catch (error) {
+                document.getElementById('status').textContent = "マイクへのアクセスが拒否されました。";
+                console.error('マイクエラー:', error);
+            }
+        }
+
+        // ローカルストレージに保存
+        function saveToLocalStorage(data) {
+            const serializedData = Array.from(data).join(',');
+            localStorage.setItem('peakData', serializedData);
+        }
+
+        // ローカルストレージから読み込む
+        function loadFromLocalStorage() {
+            const serializedData = localStorage.getItem('peakData');
+            if (serializedData) {
+                return new Uint8Array(serializedData.split(',').map(Number));
+            }
+            return null;
+        }
+
+        setupAudio();
+    </script>
+</body>
+</html>
