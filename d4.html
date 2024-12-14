@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3Dスペクトラムグラフ（赤いグラフで保存ピーク値）</title>
+    <title>3Dスペクトラムグラフ（保存ピーク値）</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
+            background-color: white; /* 白地に設定 */
         }
         #controls {
             position: absolute;
             top: 10px;
             left: 10px;
             z-index: 10;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
+            background-color: rgba(255, 255, 255, 0.8); /* 白地に合わせた背景 */
+            color: black; /* テキスト色を黒に設定 */
             padding: 10px;
             border-radius: 5px;
+            border: 1px solid #ccc;
         }
         button {
             margin: 5px;
@@ -32,9 +34,9 @@
 </head>
 <body>
     <div id="controls">
-        <p>3Dスペクトラムグラフ</p>
-        <button id="savePeak">ピーク値を保存</button>
-        <button id="clearSavedPeak">保存したピーク値を消去</button>
+        <p>A高2年国語　自分の声を確認</p>
+        <button id="savePeak">ピーク値保存</button>
+        <button id="clearSavedPeak">ピーク値消去</button>
         <p id="message"></p>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -57,13 +59,14 @@
                 // Three.js の設定
                 const scene = new THREE.Scene();
                 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer();
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setClearColor(0xffffff); // 背景色を白に設定
                 document.body.appendChild(renderer.domElement);
 
-                // 青いスペクトラム（リアルタイム）
+                // 黒いスペクトラム（リアルタイム）
                 const geometry = new THREE.PlaneGeometry(bufferLength, 100, bufferLength - 1, 99);
-                const material = new THREE.MeshBasicMaterial({ color: 0x0077ff, wireframe: true });
+                const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true }); // 色を黒に変更
                 const spectrumMesh = new THREE.Mesh(geometry, material);
                 spectrumMesh.rotation.x = -Math.PI / 3;
                 scene.add(spectrumMesh);
