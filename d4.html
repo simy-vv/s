@@ -96,11 +96,13 @@
                 });
 
                 document.getElementById("clearSavedPeak").addEventListener("click", () => {
-                    savedPeakData = null;
+                    // 保存されたピーク値をゼロにリセット
                     for (let i = 0; i < bufferLength; i++) {
-                        peakGeometry.attributes.position.array[i * 3 + 2] = 0;
+                        peakData[i] = 0; // ピークデータのリセット
+                        peakGeometry.attributes.position.array[i * 3 + 2] = 0; // 赤いグラフもリセット
                     }
-                    peakGeometry.attributes.position.needsUpdate = true;
+                    peakGeometry.attributes.position.needsUpdate = true; // グラフを更新
+                    savedPeakData = null; // 保存されたピークデータもクリア
                     showMessage("保存したピーク値を消去しました。");
                 });
 
