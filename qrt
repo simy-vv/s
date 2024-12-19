@@ -1,0 +1,20 @@
+import qrcode
+
+# QRコードにしたい文字列
+data = "https://www.example.com/"
+
+# QRコードを作成
+qr = qrcode.QRCode(
+    version=1,  # QRコードのバージョン（サイズ）
+    error_correction=qrcode.constants.ERROR_CORRECT_L,  # 誤り訂正レベル
+    box_size=10,  # モジュールサイズ
+    border=4,  # 境界線の幅
+)
+qr.add_data(data)
+qr.make(fit=True)
+
+# QRコードを画像に変換
+img = qr.make_image(fill_color="black", back_color="white")
+
+# 画像ファイルを保存
+img.save("myqrcode.png")
