@@ -1,20 +1,26 @@
-import qrcode
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QRコード生成</title>
+</head>
+<body>
+  <input type="text" id="text" placeholder="ここに文字列を入力">
+  <button onclick="generateQRCode()">QRコード生成</button>
+  <div id="qrcode"></div>
 
-# QRコードにしたい文字列
-data = "https://www.example.com/"
+  <script src="qrcode.min.js"></script>
+  <script>
+    function generateQRCode() {
+      // 入力された文字列を取得
+      const text = document.getElementById('text').value;
 
-# QRコードを作成
-qr = qrcode.QRCode(
-    version=1,  # QRコードのバージョン（サイズ）
-    error_correction=qrcode.constants.ERROR_CORRECT_L,  # 誤り訂正レベル
-    box_size=10,  # モジュールサイズ
-    border=4,  # 境界線の幅
-)
-qr.add_data(data)
-qr.make(fit=True)
-
-# QRコードを画像に変換
-img = qr.make_image(fill_color="black", back_color="white")
-
-# 画像ファイルを保存
-img.save("myqrcode.png")
+      // QRコードを生成し、div要素に表示
+      new QRCode(document.getElementById('qrcode'), {
+        text: text,
+        width: 256,
+        height: 256
+      });
+    }
+  </script>
+</body>
+</html>
