@@ -1,25 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QRコード生成</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #qrcode {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <input type="text" id="text" placeholder="ここに文字列を入力">
-  <button onclick="generateQRCode()">QRコード生成</button>
+  <h1>QRコード生成</h1>
+  <input type="text" id="textInput" placeholder="QRコード化する文字列を入力">
+  <button onclick="generateQRCode()">生成</button>
   <div id="qrcode"></div>
 
-  <script src="qrcode.min.js"></script>
   <script>
     function generateQRCode() {
-      // 入力された文字列を取得
-      const text = document.getElementById('text').value;
-
-      // QRコードを生成し、div要素に表示
-      new QRCode(document.getElementById('qrcode'), {
-        text: text,
-        width: 256,
-        height: 256
-      });
+      const text = document.getElementById('textInput').value;
+      const qrCodeDiv = document.getElementById('qrcode');
+      qrCodeDiv.innerHTML = ""; // 前回のQRコードをクリア
+      if (text.trim()) {
+        QRCode.toCanvas(qrCodeDiv, text, function (error) {
+          if (error) {
+            console.error(error);
+            alert('QRコード生成に失敗しました。');
+          }
+        });
+      } else {
+        alert("文字列を入力してください。");
+      }
     }
   </script>
 </body>
