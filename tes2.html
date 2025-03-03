@@ -1,0 +1,23 @@
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>加算プログラム</title>
+  <script>
+    function process() {
+      var val = document.getElementById("box1");
+      var currentValue = parseInt(val.value); // 現在の値を整数に変換
+
+      // NaN（数値ではない）の場合の処理
+      if (isNaN(currentValue)) {
+        val.value = 1; // 初期値を1に設定
+      } else {
+        val.value = currentValue + 1; // 整数値を加算
+      }
+    }
+  </script>
+</head>
+<body>
+  <input type="text" id="box1" value="0">
+  <button onclick="process()">加算</button>
+</body>
+</html>
