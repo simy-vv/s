@@ -1,20 +1,17 @@
-<html lang="ja">
+<html lang=“ja”>
 <head>
-    <meta charset="UTF-8">
-    <title>TES7</title>
+ <meta charset=“UTF-8”>
+ <title>TES7</title>
 </head>
 <body>
-    <script>
-        function process() {
-            let val1 = Number(document.getElementById("box1").value);
-            let val2 = Number(document.getElementById("box2").value);
-            document.getElementById("box3").value = val1 + val2;
-        }
-
-    </script>
-    <input type="text" id="box1" value="1"> +
-    <input type="text" id="box2" value="1"> =
-    <input type="text" id="box3" value="0">
-    <button onclick="process()">加算</button>
+ <script>
+  function process(){
+            let val1=Number(document.getElementById("box1").value);
+            let val2=Number(document.getElementById("box2").value);
+            document.getElementById("box3").value=val1+val2;
+}
+   </script>
+ <input type=“text” id=“box1” value="1"> +<input type=“text” id=“box2” value="1">=
+ <input type=“text” id=“box3” value="0">
+    <button onclick="process()">加算</button>
 </body>
-</html>
