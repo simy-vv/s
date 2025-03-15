@@ -1,0 +1,20 @@
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>TES10</title>
+</head>
+<body>
+    <script><!--以下プログラムコード記述-->
+        function process() {//①ボタン押下で実行
+            let val1 = Number(document.getElementById("box1").value);
+            let val2 = Number(document.getElementById("box2").value);
+            document.getElementById("box3").value = val1 + val2;
+        }
+    </script>
+   <!--以下インターフェース-->
+    <input type="text" id="box1" value="1"> +
+    <input type="text" id="box2" value="1"> =
+    <input type="text" id="box3" value="0">
+    <button onclick="process()">加算</button> <!--ボタン押下で①を呼び出し-->
+</body>
+</html>
