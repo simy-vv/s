@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>色を選べゲーム</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    #gameArea {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    #instruction {
+      text-align: center;
+      padding: 10px;
+      font-size: 24px;
+      background-color: #f8f8f8;
+    }
+
+    #targetColor {
+      font-size: 36px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    #buttonContainer {
+      flex: 1;
+      display: flex;
+    }
+
+    .choiceButton {
+      flex: 1;
+      font-size: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .choiceButton:hover {
+      opacity: 0.8;
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+      font-weight: bold;
+      display: none;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div id="setup">
+    <h1>色を選べゲーム</h1>
+    <button onclick="startGame()">ゲームスタート</button>
+  </div>
+
+  <div id="gameArea">
+    <div id="instruction">
+      次の色を選んでください：
+      <div id="targetColor"></div>
+    </div>
+
+    <div id="buttonContainer">
+      <div id="button1" class="choiceButton"></div>
+      <div id="button2" class="choiceButton"></div>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const colors = [
+      { name: "赤", value: "red" },
+      { name: "青", value: "blue" },
+      { name: "緑", value: "green" },
+      { name: "黄", value: "yellow" },
+      { name: "紫", value: "purple" },
+      { name: "黒", value: "black" },
+      { name: "オレンジ", value: "orange" },
+      { name: "ピンク", value: "pink" }
+    ];
+
+    function startGame() {
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'flex';
+      generateColorQuestion();
+    }
+
+    function generateColorQuestion() {
+      const correctIndex = Math.floor(Math.random() * colors.length);
+      const correctColor = colors[correctIndex];
+
+      let wrongColor;
+      do {
+        wrongColor = colors[Math.floor(Math.random() * colors.length)];
+      } while (wrongColor.name === correctColor.name);
+
+      const correctSide = Math.random() < 0.5 ? "button1" : "button2";
+      const wrongSide = correctSide === "button1" ? "button2" : "button1";
+
+      document.getElementById("targetColor").textContent = correctColor.name;
+
+      const btn1 = document.getElementById("button1");
+      const btn2 = document.getElementById("button2");
+      const result = document.getElementById("result");
+
+      // 色を設定
+      document.getElementById(correctSide).style.backgroundColor = correctColor.value;
+      document.getElementById(wrongSide).style.backgroundColor = wrongColor.value;
+
+      // クリア
+      result.style.display = "none";
+      result.textContent = "";
+      result.className = "";
+
+      // イベント設定
+      btn1.onclick = () => {
+        const isCorrect = correctSide === "button1";
+        showResult(isCorrect);
+      };
+
+      btn2.onclick = () => {
+        const isCorrect = correctSide === "button2";
+        showResult(isCorrect);
+      };
+    }
+
+    function showResult(correct) {
+      const result = document.getElementById("result");
+      result.textContent = correct ? "正解！🎉" : "不正解…😢";
+      result.className = correct ? "correct" : "wrong";
+      result.style.display = "block";
+
+      setTimeout(() => {
+        result.style.display = "none";
+        generateColorQuestion();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
