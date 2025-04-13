@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>⚫︎の数を当てるゲーム</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    #setup input {
+      width: 60px;
+      padding: 5px;
+      font-size: 16px;
+      margin: 5px;
+    }
+
+    #gameArea {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    #instruction {
+      text-align: center;
+      padding: 10px;
+      font-size: 20px;
+      background-color: #f8f8f8;
+    }
+
+    #targetDots {
+      font-size: 100px;
+      margin: 20px auto;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    #buttonContainer {
+      flex: 1;
+      display: flex;
+    }
+
+    .choiceButton {
+      flex: 1;
+      font-size: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .choiceButton:hover {
+      background-color: #eee;
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+      font-weight: bold;
+      display: none;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div id="setup">
+    <h1>⚫︎の数を当てるゲーム</h1>
+    <p>⚫︎の数の範囲を指定してください：</p>
+    最小: <input type="number" id="minValue" value="3">
+    最大: <input type="number" id="maxValue" value="8">
+    <button onclick="startGame()">ゲームスタート</button>
+  </div>
+
+  <div id="gameArea">
+    <div id="instruction">
+      ⚫︎の数はいくつ？
+    </div>
+    <div id="targetDots"></div>
+
+    <div id="buttonContainer">
+      <div id="button1" class="choiceButton"></div>
+      <div id="button2" class="choiceButton"></div>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    let currentMin = 3;
+    let currentMax = 8;
+
+    function startGame() {
+      const min = parseInt(document.getElementById('minValue').value);
+      const max = parseInt(document.getElementById('maxValue').value);
+
+      if (isNaN(min) || isNaN(max) || min < 1 || max <= min) {
+        alert("正しい範囲（例: 最小3、最大8）を入力してください。");
+        return;
+      }
+
+      currentMin = min;
+      currentMax = max;
+
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'flex';
+      generateGame();
+    }
+
+    function generateGame() {
+      const x = Math.floor(Math.random() * (currentMax - currentMin + 1)) + currentMin;
+      let y;
+      do {
+        y = Math.floor(Math.random() * (currentMax - currentMin + 1)) + currentMin;
+      } while (y === x);
+
+      const correctButton = Math.random() < 0.5 ? 1 : 2;
+
+      document.getElementById('targetDots').textContent = "⚫︎".repeat(x);
+
+      const button1 = document.getElementById('button1');
+      const button2 = document.getElementById('button2');
+      const result = document.getElementById('result');
+
+      button1.textContent = correctButton === 1 ? x : y;
+      button2.textContent = correctButton === 2 ? x : y;
+
+      result.style.display = "none";
+      result.textContent = "";
+      result.className = "";
+
+      button1.onclick = () => {
+        const correct = (correctButton === 1);
+        showResult(correct);
+      };
+
+      button2.onclick = () => {
+        const correct = (correctButton === 2);
+        showResult(correct);
+      };
+    }
+
+    function showResult(correct) {
+      const result = document.getElementById('result');
+      result.textContent = correct ? "正解！🎉" : "不正解…😢";
+      result.className = correct ? "correct" : "wrong";
+      result.style.display = "block";
+
+      setTimeout(() => {
+        result.style.display = "none";
+        generateGame();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

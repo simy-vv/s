@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>図形を選べゲーム</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    #gameArea {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    #instruction {
+      text-align: center;
+      padding: 10px;
+      font-size: 24px;
+      background-color: #f8f8f8;
+    }
+
+    #targetShape {
+      font-size: 36px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    #buttonContainer {
+      flex: 1;
+      display: flex;
+    }
+
+    .choiceButton {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .choiceButton:hover {
+      opacity: 0.8;
+    }
+
+    .shape {
+      width: 150px;
+      height: 150px;
+    }
+
+    .circle {
+      border-radius: 50%;
+      background-color: tomato;
+    }
+
+    .square {
+      background-color: royalblue;
+    }
+
+    .triangle {
+      width: 0;
+      height: 0;
+      border-left: 75px solid transparent;
+      border-right: 75px solid transparent;
+      border-bottom: 130px solid seagreen;
+      background: none;
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+      font-weight: bold;
+      display: none;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div id="setup">
+    <h1>図形を選べゲーム</h1>
+    <button onclick="startGame()">ゲームスタート</button>
+  </div>
+
+  <div id="gameArea">
+    <div id="instruction">
+      次の図形を選んでください：
+      <div id="targetShape"></div>
+    </div>
+
+    <div id="buttonContainer">
+      <div id="button1" class="choiceButton"></div>
+      <div id="button2" class="choiceButton"></div>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const shapes = [
+      { name: "円", class: "circle" },
+      { name: "四角", class: "square" },
+      { name: "三角", class: "triangle" }
+    ];
+
+    function startGame() {
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'flex';
+      generateShapeQuestion();
+    }
+
+    function generateShapeQuestion() {
+      const correctIndex = Math.floor(Math.random() * shapes.length);
+      const correctShape = shapes[correctIndex];
+
+      let wrongShape;
+      do {
+        wrongShape = shapes[Math.floor(Math.random() * shapes.length)];
+      } while (wrongShape.name === correctShape.name);
+
+      const correctSide = Math.random() < 0.5 ? "button1" : "button2";
+      const wrongSide = correctSide === "button1" ? "button2" : "button1";
+
+      document.getElementById("targetShape").textContent = correctShape.name;
+
+      const btn1 = document.getElementById("button1");
+      const btn2 = document.getElementById("button2");
+      const result = document.getElementById("result");
+
+      // リセット
+      btn1.innerHTML = "";
+      btn2.innerHTML = "";
+      result.style.display = "none";
+      result.textContent = "";
+      result.className = "";
+
+      const correctDiv = document.createElement("div");
+      correctDiv.className = "shape " + correctShape.class;
+
+      const wrongDiv = document.createElement("div");
+      wrongDiv.className = "shape " + wrongShape.class;
+
+      document.getElementById(correctSide).appendChild(correctDiv);
+      document.getElementById(wrongSide).appendChild(wrongDiv);
+
+      btn1.onclick = () => {
+        const isCorrect = correctSide === "button1";
+        showResult(isCorrect);
+      };
+
+      btn2.onclick = () => {
+        const isCorrect = correctSide === "button2";
+        showResult(isCorrect);
+      };
+    }
+
+    function showResult(correct) {
+      const result = document.getElementById("result");
+      result.textContent = correct ? "正解！🎉" : "不正解…😢";
+      result.className = correct ? "correct" : "wrong";
+      result.style.display = "block";
+
+      setTimeout(() => {
+        result.style.display = "none";
+        generateShapeQuestion();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
