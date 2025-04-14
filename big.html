@@ -10,6 +10,7 @@
       height: 100%;
       font-family: sans-serif;
       overflow: hidden;
+      background-color: #f7f7f7;
     }
 
     #gameArea {
@@ -21,8 +22,9 @@
     #instruction {
       text-align: center;
       padding: 20px;
-      font-size: 24px;
-      background-color: #f0f0f0;
+      font-size: 28px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     #buttonContainer {
@@ -30,19 +32,26 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 60px;
     }
 
     .dotButton {
-      flex: 1;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .dotButton:hover {
+      transform: scale(1.05);
     }
 
     .dot {
       border-radius: 50%;
       background-color: black;
+      border: 6px solid #333;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     #result {
@@ -55,7 +64,7 @@
       display: none;
       padding: 20px;
       border-radius: 12px;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(255, 255, 255, 0.95);
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     }
 
@@ -83,18 +92,13 @@
 
   <script>
     function generateGame() {
-      const minSize = 30; // px
-      const maxSize = 100;
+      const smallSize = Math.floor(Math.random() * 20) + 30; // 30〜50px
+      const largeSize = smallSize + Math.floor(Math.random() * 50) + 50; // +50〜100
 
-      let sizeA = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-      let sizeB;
-      do {
-        sizeB = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-      } while (sizeA === sizeB);
+      const isLeftBig = Math.random() < 0.5;
 
-      const leftIsBigger = Math.random() < 0.5;
-      const leftSize = leftIsBigger ? Math.max(sizeA, sizeB) : Math.min(sizeA, sizeB);
-      const rightSize = leftIsBigger ? Math.min(sizeA, sizeB) : Math.max(sizeA, sizeB);
+      const leftSize = isLeftBig ? largeSize : smallSize;
+      const rightSize = isLeftBig ? smallSize : largeSize;
 
       const button1 = document.getElementById('button1');
       const button2 = document.getElementById('button2');
