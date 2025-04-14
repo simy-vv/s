@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>⚫︎を見て判断！</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #gameArea {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #instruction {
+      text-align: center;
+      padding: 20px;
+      font-size: 24px;
+      background-color: #f0f0f0;
+    }
+
+    #buttonContainer {
+      flex: 1;
+      display: flex;
+    }
+
+    .choiceButton {
+      flex: 1;
+      font-size: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      padding: 10px;
+    }
+
+    .choiceButton:hover {
+      background-color: #eee;
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+      font-weight: bold;
+      display: none;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="gameArea">
+    <div id="instruction">⚫︎が <strong>多い方</strong> を選んでください</div>
+
+    <div id="buttonContainer">
+      <div id="button1" class="choiceButton"></div>
+      <div id="button2" class="choiceButton"></div>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    let mode = "more"; // "more" または "less"
+
+    function generateGame() {
+      const min = 3;
+      const max = 9;
+
+      let a = Math.floor(Math.random() * (max - min + 1)) + min;
+      let b;
+      do {
+        b = Math.floor(Math.random() * (max - min + 1)) + min;
+      } while (a === b);
+
+      // ランダムに「多い方」or「少ない方」を選ばせる
+      mode = Math.random() < 0.5 ? "more" : "less";
+      document.getElementById('instruction').innerHTML = `⚫︎が <strong>${mode === "more" ? "多い方" : "少ない方"}</strong> を選んでください`;
+
+      // ボタン配置もランダムに
+      const leftValue = Math.random() < 0.5 ? a : b;
+      const rightValue = leftValue === a ? b : a;
+
+      document.getElementById('button1').textContent = "⚫︎".repeat(leftValue);
+      document.getElementById('button2').textContent = "⚫︎".repeat(rightValue);
+
+      document.getElementById('result').style.display = "none";
+      document.getElementById('result').textContent = "";
+
+      document.getElementById('button1').onclick = () => checkAnswer(leftValue, rightValue);
+      document.getElementById('button2').onclick = () => checkAnswer(rightValue, leftValue);
+    }
+
+    function checkAnswer(selected, other) {
+      const isCorrect = (mode === "more" && selected > other) ||
+                        (mode === "less" && selected < other);
+
+      const result = document.getElementById('result');
+      result.textContent = isCorrect ? "正解！🎉" : "不正解…😢";
+      result.className = isCorrect ? "correct" : "wrong";
+      result.style.display = "block";
+
+      setTimeout(() => {
+        generateGame();
+      }, 2000);
+    }
+
+    generateGame(); // ゲーム開始
+  </script>
+
+</body>
+</html>
