@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>長い棒を選べ！</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      overflow: hidden;
+      background-color: #f0f0f0;
+    }
+
+    #gameArea {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #instruction {
+      text-align: center;
+      padding: 20px;
+      font-size: 28px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #buttonContainer {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 100px;
+    }
+
+    .barButton {
+      cursor: pointer;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      height: 300px;
+      width: 100px;
+    }
+
+    .barButton:hover {
+      transform: scale(1.05);
+      transition: transform 0.2s;
+    }
+
+    .bar {
+      width: 20px;
+      background-color: #333;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    #result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+      font-weight: bold;
+      display: none;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="gameArea">
+    <div id="instruction">棒が <strong>長い方</strong> を選んでください</div>
+
+    <div id="buttonContainer">
+      <div id="button1" class="barButton"></div>
+      <div id="button2" class="barButton"></div>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function generateGame() {
+      const shortLength = Math.floor(Math.random() * 40) + 60; // 60〜100px
+      const longLength = shortLength + Math.floor(Math.random() * 80) + 40; // +40〜120px
+
+      const isLeftLong = Math.random() < 0.5;
+
+      const leftLength = isLeftLong ? longLength : shortLength;
+      const rightLength = isLeftLong ? shortLength : longLength;
+
+      const button1 = document.getElementById('button1');
+      const button2 = document.getElementById('button2');
+      button1.innerHTML = `<div class="bar" style="height:${leftLength}px;"></div>`;
+      button2.innerHTML = `<div class="bar" style="height:${rightLength}px;"></div>`;
+
+      const result = document.getElementById('result');
+      result.style.display = "none";
+      result.textContent = "";
+
+      button1.onclick = () => checkAnswer(leftLength > rightLength);
+      button2.onclick = () => checkAnswer(rightLength > leftLength);
+    }
+
+    function checkAnswer(correct) {
+      const result = document.getElementById('result');
+      result.textContent = correct ? "正解！" : "不正解…";
+      result.className = correct ? "correct" : "wrong";
+      result.style.display = "block";
+
+      setTimeout(() => {
+        generateGame();
+      }, 2000);
+    }
+
+    generateGame(); // 初回スタート
+  </script>
+
+</body>
+</html>
