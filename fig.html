@@ -1,102 +1,393 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>図形の種類を選ぶ学習</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #f9f9f9;
-    }
-    .shapes-row {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0;
-      gap: 20px;
-    }
-    .shape {
-      width: 80px;
-      height: 80px;
-      display: inline-block;
-    }
-    .circle {
-      background: red;
-      border-radius: 50%;
-    }
-    .square {
-      background: blue;
-    }
-    .triangle {
-      width: 0;
-      height: 0;
-      border-left: 40px solid transparent;
-      border-right: 40px solid transparent;
-      border-bottom: 80px solid green;
-      background: none;
-    }
-    .option:hover {
-      cursor: pointer;
-      outline: 4px solid gold;
-    }
-  </style>
-</head>
-<body>
-  <h2>お手本の図形群</h2>
-  <div class="shapes-row" id="sample"></div>
+<!DOCTYPE html> 
 
-  <h2>同じ種類の図形を選んでください</h2>
-  <div class="shapes-row" id="options">
-    <div class="shape option circle" data-shape="circle"></div>
-    <div class="shape option square" data-shape="square"></div>
-    <div class="shape option triangle" data-shape="triangle"></div>
-  </div>
+<html lang="ja"> 
 
-  <p id="result" style="font-size: 1.5em; margin-top: 20px;"></p>
-  <button onclick="generateQuestion()">次の問題へ</button>
+<head> 
 
-  <script>
-    const shapes = ["circle", "square", "triangle"];
-    let correctShape = "circle"; // 初期値
+  <meta charset="UTF-8"> 
 
-    function createShapeElement(shape) {
-      const div = document.createElement("div");
-      div.classList.add("shape", shape);
-      return div;
-    }
+  <title>図形を見て同じ種類を選ぶ</title> 
 
-    function generateQuestion() {
-      // 正解の形をランダムに選ぶ
-      correctShape = shapes[Math.floor(Math.random() * shapes.length)];
+  <style> 
 
-      // お手本図形を更新
-      const sample = document.getElementById("sample");
-      sample.innerHTML = ""; // クリア
-      for (let i = 0; i < 3; i++) {
-        sample.appendChild(createShapeElement(correctShape));
-      }
+    body { 
 
-      // 結果メッセージをリセット
-      document.getElementById("result").textContent = "";
-    }
+      font-family: sans-serif; 
 
-    // 選択肢のクリック処理
-    document.querySelectorAll('.option').forEach(option => {
-      option.addEventListener('click', () => {
-        const selected = option.getAttribute('data-shape');
-        const result = document.getElementById('result');
-        if (selected === correctShape) {
-          result.textContent = "正解です！";
-          result.style.color = "green";
-        } else {
-          result.textContent = "ちがいます。もう一度！";
-          result.style.color = "red";
-        }
-      });
-    });
+      text-align: center; 
 
-    // 初回出題
-    generateQuestion();
-  </script>
-</body>
-</html>
+      background: #f0f0f0; 
+
+    } 
+
+ 
+
+    .shape { 
+
+      width: 100px; 
+
+      height: 100px; 
+
+      display: inline-block; 
+
+      margin: 20px; 
+
+    } 
+
+ 
+
+    .circle { 
+
+      background: red; 
+
+      border-radius: 50%; 
+
+    } 
+
+ 
+
+    .square { 
+
+      background: blue; 
+
+    } 
+
+ 
+
+    .triangle { 
+
+      width: 0; 
+
+      height: 0; 
+
+      border-left: 50px solid transparent; 
+
+      border-right: 50px solid transparent; 
+
+      border-bottom: 100px solid green; 
+
+      background: none; 
+
+    } 
+
+ 
+
+    .star { 
+
+      background: gold; 
+
+      clip-path: polygon( 
+
+        50% 0%, 
+
+        61% 35%, 
+
+        98% 35%, 
+
+        68% 57%, 
+
+        79% 91%, 
+
+        50% 70%, 
+
+        21% 91%, 
+
+        32% 57%, 
+
+        2% 35%, 
+
+        39% 35% 
+
+      ); 
+
+    } 
+
+ 
+
+    .heart { 
+
+      background: pink; 
+
+      clip-path: polygon( 
+
+        50% 85%, 
+
+        100% 35%, 
+
+        80% 0%, 
+
+        50% 20%, 
+
+        20% 0%, 
+
+        0% 35% 
+
+      ); 
+
+    } 
+
+ 
+
+    .diamond { 
+
+      background: cyan; 
+
+      clip-path: polygon( 
+
+        50% 0%, 100% 50%, 50% 100%, 0% 50% 
+
+      ); 
+
+    } 
+
+ 
+
+    .pentagon { 
+
+      background: purple; 
+
+      clip-path: polygon( 
+
+        50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38% 
+
+      ); 
+
+    } 
+
+ 
+
+    .hexagon { 
+
+      background: orange; 
+
+      clip-path: polygon( 
+
+        25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50% 
+
+      ); 
+
+    } 
+
+ 
+
+    .cross { 
+
+      background: darkgray; 
+
+      clip-path: polygon( 
+
+        30% 0%, 70% 0%, 70% 30%, 100% 30%, 
+
+        100% 70%, 70% 70%, 70% 100%, 30% 100%, 
+
+        30% 70%, 0% 70%, 0% 30%, 30% 30% 
+
+      ); 
+
+    } 
+
+ 
+
+    .oval { 
+
+      background: brown; 
+
+      border-radius: 50% / 30%; 
+
+    } 
+
+ 
+
+    .shape-row { 
+
+      display: flex; 
+
+      justify-content: center; 
+
+      gap: 40px; 
+
+      margin-top: 20px; 
+
+    } 
+
+ 
+
+    #question { 
+
+      margin-bottom: 80px; /* ← ここで余白を追加 */ 
+
+    } 
+
+ 
+
+    .option:hover { 
+
+      cursor: pointer; 
+
+      outline: 4px solid gold; 
+
+    } 
+
+ 
+
+    #result { 
+
+      font-size: 1.5em; 
+
+      margin-top: 30px; 
+
+    } 
+
+  </style> 
+
+</head> 
+
+<body> 
+
+ 
+
+  <h2>この図形と同じ形を選んでください</h2> 
+
+  <div id="question" class="shape"></div> 
+
+ 
+
+  <div class="shape-row" id="choices"></div> 
+
+ 
+
+  <p id="result"></p> 
+
+  <button onclick="generateQuestion()">次の問題へ</button> 
+
+ 
+
+  <script> 
+
+    const shapeTypes = [ 
+
+      "circle", "square", "triangle", "star", "heart", 
+
+      "diamond", "pentagon", "hexagon", "cross", "oval" 
+
+    ]; 
+
+ 
+
+    let correctShape = ""; 
+
+ 
+
+    function createShapeElement(shape, isOption = false) { 
+
+      const div = document.createElement("div"); 
+
+      div.classList.add("shape", shape); 
+
+      if (isOption) { 
+
+        div.classList.add("option"); 
+
+        div.dataset.shape = shape; 
+
+      } 
+
+      return div; 
+
+    } 
+
+ 
+
+    function generateQuestion() { 
+
+      // 正解の形をランダムで選ぶ 
+
+      correctShape = shapeTypes[Math.floor(Math.random() * shapeTypes.length)]; 
+
+ 
+
+      // 問題図形の表示 
+
+      const questionDiv = document.getElementById("question"); 
+
+      questionDiv.className = "shape " + correctShape; 
+
+ 
+
+      // 選択肢の生成（正解＋不正解2つ） 
+
+      let options = [correctShape]; 
+
+      while (options.length < 3) { 
+
+        const candidate = shapeTypes[Math.floor(Math.random() * shapeTypes.length)]; 
+
+        if (!options.includes(candidate)) { 
+
+          options.push(candidate); 
+
+        } 
+
+      } 
+
+ 
+
+      // 選択肢をシャッフル 
+
+      options.sort(() => Math.random() - 0.5); 
+
+ 
+
+      // 選択肢を表示 
+
+      const choiceContainer = document.getElementById("choices"); 
+
+      choiceContainer.innerHTML = ""; 
+
+      options.forEach(shape => { 
+
+        const shapeEl = createShapeElement(shape, true); 
+
+        shapeEl.addEventListener("click", () => checkAnswer(shape)); 
+
+        choiceContainer.appendChild(shapeEl); 
+
+      }); 
+
+ 
+
+      document.getElementById("result").textContent = ""; 
+
+    } 
+
+ 
+
+    function checkAnswer(selectedShape) { 
+
+      const result = document.getElementById("result"); 
+
+      if (selectedShape === correctShape) { 
+
+        result.textContent = "正解です！"; 
+
+        result.style.color = "green"; 
+
+      } else { 
+
+        result.textContent = "ちがいます。もう一度！"; 
+
+        result.style.color = "red"; 
+
+      } 
+
+    } 
+
+ 
+
+    generateQuestion(); // 初回出題 
+
+  </script> 
+
+</body> 
+
+</html> 
