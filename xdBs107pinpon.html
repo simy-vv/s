@@ -17,13 +17,13 @@
         }
         #output {
             width: 80%;
-            height: 100px;
+            height: 120px;
             border: 2px solid #333;
             background: white;
-            padding: 10px;
-            font-size: 1.5rem;
+            padding: 15px;
+            font-size: 1.8rem;
             overflow-y: auto;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             text-align: center;
             display: flex;
             align-items: center;
@@ -35,30 +35,34 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             width: 90%;
         }
         .input-group {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
             flex-wrap: wrap;
             justify-content: center;
         }
         #volume {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             font-weight: bold;
         }
         input, button {
             padding: 12px;
-            font-size: 1rem;
-            border-radius: 5px;
+            font-size: 1.2rem;
+            border-radius: 8px;
             border: 1px solid #ccc;
         }
+        /* 入力テキストボックスのサイズを2倍に調整 */
         #targetText {
-            width: 250px;
-            border: 2px solid #007bff;
+            width: 500px; /* 250px -> 500px */
+            font-size: 2rem; /* 1rem -> 2rem */
+            border: 3px solid #007bff;
             text-align: center;
+            padding: 20px;
+            margin-bottom: 10px;
         }
         button {
             cursor: pointer;
@@ -66,6 +70,7 @@
             color: white;
             border: none;
             transition: 0.2s;
+            padding: 15px 30px;
         }
         button:hover { background-color: #0056b3; }
         #stopBtn { background-color: #dc3545; }
@@ -85,6 +90,14 @@
             50% { background-color: #dc3545; transform: scale(1.05); }
             100% { background-color: #fff; transform: scale(1); }
         }
+
+        /* スマホ対応：画面幅が狭い場合は幅を調整 */
+        @media (max-width: 600px) {
+            #targetText {
+                width: 90%;
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -101,7 +114,7 @@
         
         <div class="input-group">
             <label for="volumeThreshold">判定音量 (dB): </label>
-            <input type="number" id="volumeThreshold" value="60">
+            <input type="number" id="volumeThreshold" value="60" style="width: 80px;">
             
             <button id="startBtn">スタート</button>
             <button id="stopBtn">ストップ</button>
@@ -123,14 +136,13 @@
         let javascriptNode;
         let isProcessing = false; 
 
-        // --- 音を鳴らす関数 ---
         function playSound(type) {
             if (!audioContext) return;
             const now = audioContext.currentTime;
             const gain = audioContext.createGain();
             gain.connect(audioContext.destination);
 
-            if (type === 'success') { // ピンポーン
+            if (type === 'success') {
                 const osc1 = audioContext.createOscillator();
                 const osc2 = audioContext.createOscillator();
                 osc1.frequency.setValueAtTime(880, now);
@@ -140,7 +152,7 @@
                 osc1.connect(gain); osc2.connect(gain);
                 osc1.start(now); osc1.stop(now + 0.5);
                 osc2.start(now + 0.3); osc2.stop(now + 1.0);
-            } else { // ブブー（不協和音）
+            } else {
                 const osc1 = audioContext.createOscillator();
                 const osc2 = audioContext.createOscillator();
                 osc1.type = 'sawtooth';
@@ -175,11 +187,9 @@
 
                 const target = targetTextInput.value.trim();
 
-                // 1. 正解判定（発話の途中で見つかってもOK）
                 if (transcript.includes(target) && target !== "") {
                     handleJudge(true);
                 } 
-                // 2. 不正解判定（言い終わって確定したのに正解が含まれていない場合）
                 else if (isFinal && transcript !== "" && !transcript.includes(target)) {
                     handleJudge(false);
                 }
@@ -208,7 +218,6 @@
                 }, 500);
             }
 
-            // マイクと音量計の開始
             function startAudio(stream) {
                 if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioContext.createAnalyser();
@@ -240,7 +249,7 @@
             });
 
             stopBtn.addEventListener('click', () => {
-                location.reload(); // 状態を完全にリセット
+                location.reload();
             });
         }
     </script>
