@@ -29,6 +29,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 8px;
+            transition: background-color 0.3s;
         }
         .controls {
             display: flex;
@@ -70,13 +71,18 @@
         #stopBtn { background-color: #dc3545; }
         #stopBtn:hover { background-color: #a71d2a; }
         
-        /* 正解時のアニメーション */
-        .correct-flash {
-            animation: flash 0.6s ease;
-        }
-        @keyframes flash {
+        /* 正解・不正解時のアニメーション */
+        .correct-flash { animation: flash-green 0.6s ease; }
+        .wrong-flash { animation: flash-red 0.6s ease; }
+
+        @keyframes flash-green {
             0% { background-color: #fff; transform: scale(1); }
             50% { background-color: #28a745; transform: scale(1.05); }
+            100% { background-color: #fff; transform: scale(1); }
+        }
+        @keyframes flash-red {
+            0% { background-color: #fff; transform: scale(1); }
+            50% { background-color: #dc3545; transform: scale(1.05); }
             100% { background-color: #fff; transform: scale(1); }
         }
     </style>
@@ -115,33 +121,38 @@
         let analyser;
         let microphone;
         let javascriptNode;
-        let isSuccessProcessing = false; // 処理中の重複動作防止用
+        let isProcessing = false; 
 
-        // --- ピンポン音を鳴らす関数 (Web Audio API) ---
-        function playSuccessSound() {
+        // --- 音を鳴らす関数 ---
+        function playSound(type) {
             if (!audioContext) return;
-            const osc1 = audioContext.createOscillator();
-            const osc2 = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-
-            osc1.type = 'sine';
-            osc2.type = 'sine';
-            
             const now = audioContext.currentTime;
-            osc1.frequency.setValueAtTime(880, now); 
-            osc2.frequency.setValueAtTime(659.25, now + 0.3); 
-            
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
-
-            osc1.connect(gain);
-            osc2.connect(gain);
+            const gain = audioContext.createGain();
             gain.connect(audioContext.destination);
 
-            osc1.start(now);
-            osc1.stop(now + 0.5);
-            osc2.start(now + 0.3);
-            osc2.stop(now + 1.0);
+            if (type === 'success') { // ピンポーン
+                const osc1 = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                osc1.frequency.setValueAtTime(880, now);
+                osc2.frequency.setValueAtTime(659.25, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                osc1.connect(gain); osc2.connect(gain);
+                osc1.start(now); osc1.stop(now + 0.5);
+                osc2.start(now + 0.3); osc2.stop(now + 1.0);
+            } else { // ブブー（不協和音）
+                const osc1 = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                osc1.type = 'sawtooth';
+                osc2.type = 'sawtooth';
+                osc1.frequency.setValueAtTime(140, now);
+                osc2.frequency.setValueAtTime(145, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.6);
+                osc1.connect(gain); osc2.connect(gain);
+                osc1.start(now); osc1.stop(now + 0.6);
+                osc2.start(now); osc2.stop(now + 0.6);
+            }
         }
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -152,59 +163,57 @@
             recognition.continuous = true;
 
             recognition.onresult = (event) => {
-                if (isSuccessProcessing) return; // 正解処理中は何もしない
+                if (isProcessing) return;
 
                 let transcript = '';
+                let isFinal = false;
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     transcript += event.results[i][0].transcript;
+                    if (event.results[i].isFinal) isFinal = true;
                 }
                 outputDiv.textContent = transcript;
 
                 const target = targetTextInput.value.trim();
-                
-                // 一致判定
+
+                // 1. 正解判定（発話の途中で見つかってもOK）
                 if (transcript.includes(target) && target !== "") {
-                    isSuccessProcessing = true; // 処理開始
-                    
-                    // 1. ピンポン音を鳴らす
-                    playSuccessSound();
-                    
-                    // 2. 画面を光らせる
+                    handleJudge(true);
+                } 
+                // 2. 不正解判定（言い終わって確定したのに正解が含まれていない場合）
+                else if (isFinal && transcript !== "" && !transcript.includes(target)) {
+                    handleJudge(false);
+                }
+            };
+
+            function handleJudge(isCorrect) {
+                isProcessing = true;
+                recognition.stop();
+
+                if (isCorrect) {
+                    playSound('success');
                     outputDiv.classList.add('correct-flash');
-                    
-                    // 3. 音声認識を一旦止めてリセット
-                    // 認識を止めることで、現在の「がんばれ」という文字列をクリアする準備をします
-                    recognition.stop();
+                } else {
+                    playSound('error');
+                    outputDiv.classList.add('wrong-flash');
+                }
 
+                setTimeout(() => {
+                    outputDiv.textContent = isCorrect ? "正解！" : "ちがうよ！";
                     setTimeout(() => {
-                        // 4. 表示をクリアして再開準備
                         outputDiv.textContent = "（リセット完了：次をどうぞ）";
-                        outputDiv.classList.remove('correct-flash');
-                        
-                        // 5. 認識を再開
+                        outputDiv.classList.remove('correct-flash', 'wrong-flash');
                         recognition.start();
-                        isSuccessProcessing = false;
-                    }, 1500); // 1.5秒後に次へ
-                }
-            };
+                        isProcessing = false;
+                    }, 800);
+                }, 500);
+            }
 
-            // エラーハンドリング（停止後の自動再開に失敗した時用）
-            recognition.onerror = (event) => {
-                console.error("Speech Recognition Error:", event.error);
-                if (event.error === 'not-allowed') {
-                    alert("マイクの使用が許可されていません");
-                }
-            };
-
-            function startVolumeMeter(stream) {
-                if(!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
+            // マイクと音量計の開始
+            function startAudio(stream) {
+                if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioContext.createAnalyser();
                 microphone = audioContext.createMediaStreamSource(stream);
                 javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-                analyser.smoothingTimeConstant = 0.8;
-                analyser.fftSize = 1024;
                 microphone.connect(analyser);
                 analyser.connect(javascriptNode);
                 javascriptNode.connect(audioContext.destination);
@@ -213,37 +222,25 @@
                     const array = new Uint8Array(analyser.frequencyBinCount);
                     analyser.getByteFrequencyData(array);
                     let values = 0;
-                    for (let i = 0; i < array.length; i++) { values += array[i]; }
-                    const average = values / array.length;
-                    const decibels = Math.round(average);
+                    for (let i = 0; i < array.length; i++) values += array[i];
+                    const decibels = Math.round(values / array.length);
                     volumeDiv.textContent = `音量: ${decibels} dB`;
-                    const threshold = parseInt(volumeThresholdInput.value);
-                    volumeDiv.style.color = decibels > threshold ? 'red' : 'black';
+                    volumeDiv.style.color = decibels > parseInt(volumeThresholdInput.value) ? 'red' : 'black';
                 };
             }
 
             startBtn.addEventListener('click', () => {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-                    if (audioContext && audioContext.state === 'suspended') {
-                        audioContext.resume();
-                    }
+                    if (audioContext && audioContext.state === 'suspended') audioContext.resume();
                     recognition.start();
-                    startVolumeMeter(stream);
+                    startAudio(stream);
                     startBtn.disabled = true;
                     startBtn.textContent = "実行中...";
-                }).catch((error) => {
-                    alert('マイクアクセスを許可してください');
-                });
+                }).catch(() => alert('マイクを許可してください'));
             });
 
             stopBtn.addEventListener('click', () => {
-                recognition.stop();
-                if (audioContext) audioContext.close().then(() => {
-                    audioContext = null;
-                });
-                startBtn.disabled = false;
-                startBtn.textContent = "スタート";
-                outputDiv.textContent = "停止中";
+                location.reload(); // 状態を完全にリセット
             });
         }
     </script>
