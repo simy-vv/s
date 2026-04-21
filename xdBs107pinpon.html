@@ -28,6 +28,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 8px;
         }
         .controls {
             display: flex;
@@ -56,6 +57,7 @@
         #targetText {
             width: 250px;
             border: 2px solid #007bff;
+            text-align: center;
         }
         button {
             cursor: pointer;
@@ -68,13 +70,14 @@
         #stopBtn { background-color: #dc3545; }
         #stopBtn:hover { background-color: #a71d2a; }
         
+        /* 正解時のアニメーション */
         .correct-flash {
-            animation: flash 0.5s ease;
+            animation: flash 0.6s ease;
         }
         @keyframes flash {
-            0% { background-color: #fff; }
-            50% { background-color: #28a745; }
-            100% { background-color: #fff; }
+            0% { background-color: #fff; transform: scale(1); }
+            50% { background-color: #28a745; transform: scale(1.05); }
+            100% { background-color: #fff; transform: scale(1); }
         }
     </style>
 </head>
@@ -112,7 +115,7 @@
         let analyser;
         let microphone;
         let javascriptNode;
-        let isCorrected = false; // 重複回答防止用
+        let isSuccessProcessing = false; // 処理中の重複動作防止用
 
         // --- ピンポン音を鳴らす関数 (Web Audio API) ---
         function playSuccessSound() {
@@ -124,12 +127,9 @@
             osc1.type = 'sine';
             osc2.type = 'sine';
             
-            // ピン・ポンの2音階
             const now = audioContext.currentTime;
-            osc1.frequency.setValueAtTime(880, now); // ラ(A5)
-            osc1.frequency.exponentialRampToValueAtTime(880, now + 0.5);
-            
-            osc2.frequency.setValueAtTime(659.25, now + 0.3); // ミ(E5)
+            osc1.frequency.setValueAtTime(880, now); 
+            osc2.frequency.setValueAtTime(659.25, now + 0.3); 
             
             gain.gain.setValueAtTime(0.3, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
@@ -152,39 +152,59 @@
             recognition.continuous = true;
 
             recognition.onresult = (event) => {
+                if (isSuccessProcessing) return; // 正解処理中は何もしない
+
                 let transcript = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     transcript += event.results[i][0].transcript;
                 }
                 outputDiv.textContent = transcript;
 
-                // 一致判定ロジック
                 const target = targetTextInput.value.trim();
-                // 文字列が含まれているか、または完全一致で判定
-                if (transcript.includes(target) && !isCorrected) {
-                    playSuccessSound();
-                    outputDiv.classList.add('correct-flash');
-                    setTimeout(() => outputDiv.classList.remove('correct-flash'), 500);
+                
+                // 一致判定
+                if (transcript.includes(target) && target !== "") {
+                    isSuccessProcessing = true; // 処理開始
                     
-                    // 連続で鳴りすぎないようにフラグ管理（必要に応じて解除）
-                    isCorrected = true; 
-                    setTimeout(() => { isCorrected = false; }, 2000); 
+                    // 1. ピンポン音を鳴らす
+                    playSuccessSound();
+                    
+                    // 2. 画面を光らせる
+                    outputDiv.classList.add('correct-flash');
+                    
+                    // 3. 音声認識を一旦止めてリセット
+                    // 認識を止めることで、現在の「がんばれ」という文字列をクリアする準備をします
+                    recognition.stop();
+
+                    setTimeout(() => {
+                        // 4. 表示をクリアして再開準備
+                        outputDiv.textContent = "（リセット完了：次をどうぞ）";
+                        outputDiv.classList.remove('correct-flash');
+                        
+                        // 5. 認識を再開
+                        recognition.start();
+                        isSuccessProcessing = false;
+                    }, 1500); // 1.5秒後に次へ
+                }
+            };
+
+            // エラーハンドリング（停止後の自動再開に失敗した時用）
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error:", event.error);
+                if (event.error === 'not-allowed') {
+                    alert("マイクの使用が許可されていません");
                 }
             };
 
             function startVolumeMeter(stream) {
-                // AudioContextの初期化
                 if(!audioContext) {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                
                 analyser = audioContext.createAnalyser();
                 microphone = audioContext.createMediaStreamSource(stream);
                 javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
                 analyser.smoothingTimeConstant = 0.8;
                 analyser.fftSize = 1024;
-
                 microphone.connect(analyser);
                 analyser.connect(javascriptNode);
                 javascriptNode.connect(audioContext.destination);
@@ -196,7 +216,6 @@
                     for (let i = 0; i < array.length; i++) { values += array[i]; }
                     const average = values / array.length;
                     const decibels = Math.round(average);
-
                     volumeDiv.textContent = `音量: ${decibels} dB`;
                     const threshold = parseInt(volumeThresholdInput.value);
                     volumeDiv.style.color = decibels > threshold ? 'red' : 'black';
@@ -205,12 +224,13 @@
 
             startBtn.addEventListener('click', () => {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-                    // AudioContextを再開（ブラウザの自動再生制限対策）
                     if (audioContext && audioContext.state === 'suspended') {
                         audioContext.resume();
                     }
                     recognition.start();
                     startVolumeMeter(stream);
+                    startBtn.disabled = true;
+                    startBtn.textContent = "実行中...";
                 }).catch((error) => {
                     alert('マイクアクセスを許可してください');
                 });
@@ -221,9 +241,10 @@
                 if (audioContext) audioContext.close().then(() => {
                     audioContext = null;
                 });
+                startBtn.disabled = false;
+                startBtn.textContent = "スタート";
+                outputDiv.textContent = "停止中";
             });
-        } else {
-            outputDiv.textContent = '未対応のブラウザです。';
         }
     </script>
 </body>
