@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音声を文字化＆一致判定</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+        }
+        #output {
+            width: 80%;
+            height: 100px;
+            border: 2px solid #333;
+            background: white;
+            padding: 10px;
+            font-size: 1.5rem;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 90%;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #volume {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        input, button {
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #targetText {
+            width: 250px;
+            border: 2px solid #007bff;
+        }
+        button {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            transition: 0.2s;
+        }
+        button:hover { background-color: #0056b3; }
+        #stopBtn { background-color: #dc3545; }
+        #stopBtn:hover { background-color: #a71d2a; }
+        
+        .correct-flash {
+            animation: flash 0.5s ease;
+        }
+        @keyframes flash {
+            0% { background-color: #fff; }
+            50% { background-color: #28a745; }
+            100% { background-color: #fff; }
+        }
+    </style>
+</head>
+<body>
+    <h1>実習実践トレーニング</h1>
+    
+    <p>↓ この言葉を言ってください ↓</p>
+    <input type="text" id="targetText" value="がんばれ" placeholder="正解の言葉を入力">
+
+    <p>音声認識結果:</p>
+    <div id="output">（ここに結果が出ます）</div>
+    
+    <div class="controls">
+        <div id="volume">音量: 0 dB</div>
+        
+        <div class="input-group">
+            <label for="volumeThreshold">判定音量 (dB): </label>
+            <input type="number" id="volumeThreshold" value="60">
+            
+            <button id="startBtn">スタート</button>
+            <button id="stopBtn">ストップ</button>
+        </div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const outputDiv = document.getElementById('output');
+        const volumeDiv = document.getElementById('volume');
+        const volumeThresholdInput = document.getElementById('volumeThreshold');
+        const targetTextInput = document.getElementById('targetText');
+        
+        let recognition;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let isCorrected = false; // 重複回答防止用
+
+        // --- ピンポン音を鳴らす関数 (Web Audio API) ---
+        function playSuccessSound() {
+            if (!audioContext) return;
+            const osc1 = audioContext.createOscillator();
+            const osc2 = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc1.type = 'sine';
+            osc2.type = 'sine';
+            
+            // ピン・ポンの2音階
+            const now = audioContext.currentTime;
+            osc1.frequency.setValueAtTime(880, now); // ラ(A5)
+            osc1.frequency.exponentialRampToValueAtTime(880, now + 0.5);
+            
+            osc2.frequency.setValueAtTime(659.25, now + 0.3); // ミ(E5)
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc1.start(now);
+            osc1.stop(now + 0.5);
+            osc2.start(now + 0.3);
+            osc2.stop(now + 1.0);
+        }
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                outputDiv.textContent = transcript;
+
+                // 一致判定ロジック
+                const target = targetTextInput.value.trim();
+                // 文字列が含まれているか、または完全一致で判定
+                if (transcript.includes(target) && !isCorrected) {
+                    playSuccessSound();
+                    outputDiv.classList.add('correct-flash');
+                    setTimeout(() => outputDiv.classList.remove('correct-flash'), 500);
+                    
+                    // 連続で鳴りすぎないようにフラグ管理（必要に応じて解除）
+                    isCorrected = true; 
+                    setTimeout(() => { isCorrected = false; }, 2000); 
+                }
+            };
+
+            function startVolumeMeter(stream) {
+                // AudioContextの初期化
+                if(!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 1024;
+
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                javascriptNode.onaudioprocess = () => {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+                    let values = 0;
+                    for (let i = 0; i < array.length; i++) { values += array[i]; }
+                    const average = values / array.length;
+                    const decibels = Math.round(average);
+
+                    volumeDiv.textContent = `音量: ${decibels} dB`;
+                    const threshold = parseInt(volumeThresholdInput.value);
+                    volumeDiv.style.color = decibels > threshold ? 'red' : 'black';
+                };
+            }
+
+            startBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    // AudioContextを再開（ブラウザの自動再生制限対策）
+                    if (audioContext && audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    recognition.start();
+                    startVolumeMeter(stream);
+                }).catch((error) => {
+                    alert('マイクアクセスを許可してください');
+                });
+            });
+
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();
+                if (audioContext) audioContext.close().then(() => {
+                    audioContext = null;
+                });
+            });
+        } else {
+            outputDiv.textContent = '未対応のブラウザです。';
+        }
+    </script>
+</body>
+</html>
