@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>実習実践トレーニング（安定版）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+        }
+        #output {
+            width: 80%;
+            height: 120px;
+            border: 2px solid #333;
+            background: white;
+            padding: 15px;
+            font-size: 1.8rem;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 90%;
+        }
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #volume {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        input, button {
+            padding: 12px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        #targetText {
+            width: 500px;
+            font-size: 2rem;
+            border: 3px solid #007bff;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+        button {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            transition: 0.2s;
+            padding: 15px 30px;
+        }
+        button:hover { background-color: #0056b3; }
+        #stopBtn { background-color: #dc3545; }
+        #stopBtn:hover { background-color: #a71d2a; }
+        
+        .correct-flash { animation: flash-green 0.6s ease; }
+        .wrong-flash { animation: flash-red 0.6s ease; }
+
+        @keyframes flash-green {
+            0% { background-color: #fff; transform: scale(1); }
+            50% { background-color: #28a745; transform: scale(1.05); }
+            100% { background-color: #fff; transform: scale(1); }
+        }
+        @keyframes flash-red {
+            0% { background-color: #fff; transform: scale(1); }
+            50% { background-color: #dc3545; transform: scale(1.05); }
+            100% { background-color: #fff; transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            #targetText { width: 90%; font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <h1>実習実践トレーニング</h1>
+    
+    <p>↓ この言葉を大きく言ってください ↓</p>
+    <input type="text" id="targetText" value="がんばれ" placeholder="正解の言葉を入力">
+
+    <p>音声認識結果:</p>
+    <div id="output">（待機中）</div>
+    
+    <div class="controls">
+        <div id="volume">音量: 0 dB</div>
+        
+        <div class="input-group">
+            <label for="volumeThreshold">判定音量 (dB): </label>
+            <input type="number" id="volumeThreshold" value="60" style="width: 80px;">
+            
+            <button id="startBtn">スタート</button>
+            <button id="stopBtn">リセット</button>
+        </div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const outputDiv = document.getElementById('output');
+        const volumeDiv = document.getElementById('volume');
+        const volumeThresholdInput = document.getElementById('volumeThreshold');
+        const targetTextInput = document.getElementById('targetText');
+        
+        let recognition;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let isProcessing = false;
+        let currentMaxVolume = 0;
+
+        function playSound(type) {
+            if (!audioContext) return;
+            const now = audioContext.currentTime;
+            const gain = audioContext.createGain();
+            gain.connect(audioContext.destination);
+
+            if (type === 'success') {
+                const osc1 = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                osc1.frequency.setValueAtTime(880, now);
+                osc2.frequency.setValueAtTime(659.25, now + 0.3);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                osc1.connect(gain); osc2.connect(gain);
+                osc1.start(now); osc1.stop(now + 0.5);
+                osc2.start(now + 0.3); osc2.stop(now + 1.0);
+            } else {
+                const osc1 = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                osc1.type = 'sawtooth';
+                osc2.type = 'sawtooth';
+                osc1.frequency.setValueAtTime(140, now);
+                osc2.frequency.setValueAtTime(145, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.6);
+                osc1.connect(gain); osc2.connect(gain);
+                osc1.start(now); osc1.stop(now + 0.6);
+                osc2.start(now); osc2.stop(now + 0.6);
+            }
+        }
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            recognition.onresult = (event) => {
+                if (isProcessing) return;
+
+                let transcript = '';
+                let isFinal = false;
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                    if (event.results[i].isFinal) isFinal = true;
+                }
+                outputDiv.textContent = transcript;
+
+                // 入力値を取得（安全策として空の場合はデフォルト値）
+                const target = targetTextInput.value.trim();
+                const threshold = parseInt(volumeThresholdInput.value) || 0;
+
+                if (target !== "" && transcript.includes(target)) {
+                    if (currentMaxVolume >= threshold) {
+                        handleJudge("correct");
+                    } else {
+                        handleJudge("too-quiet");
+                    }
+                } 
+                else if (isFinal && transcript.trim() !== "" && !transcript.includes(target)) {
+                    handleJudge("wrong");
+                }
+            };
+
+            // 認識が途切れたときの自動復帰
+            recognition.onend = () => {
+                if (!isProcessing && startBtn.disabled) {
+                    recognition.start();
+                }
+            };
+
+            function handleJudge(status) {
+                isProcessing = true;
+                recognition.stop();
+
+                outputDiv.classList.remove('correct-flash', 'wrong-flash');
+                void outputDiv.offsetWidth; // アニメーションのリセット用ハック
+
+                if (status === "correct") {
+                    playSound('success');
+                    outputDiv.classList.add('correct-flash');
+                    outputDiv.textContent = "合格！いい声です！";
+                } else if (status === "too-quiet") {
+                    playSound('error');
+                    outputDiv.classList.add('wrong-flash');
+                    outputDiv.textContent = "声が小さい！（最大:" + currentMaxVolume + "dB）";
+                } else {
+                    playSound('error');
+                    outputDiv.classList.add('wrong-flash');
+                    outputDiv.textContent = "ちがうよ！";
+                }
+
+                setTimeout(() => {
+                    outputDiv.textContent = "（リセット中...）";
+                    setTimeout(() => {
+                        outputDiv.textContent = "（次をどうぞ！）";
+                        outputDiv.classList.remove('correct-flash', 'wrong-flash');
+                        currentMaxVolume = 0;
+                        isProcessing = false;
+                        recognition.start();
+                    }, 1000);
+                }, 1500);
+            }
+
+            function startAudio(stream) {
+                if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if(audioContext.state === 'suspended') audioContext.resume();
+                
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+                
+                microphone.connect(analyser);
+                analyser.connect(javascriptNode);
+                javascriptNode.connect(audioContext.destination);
+
+                javascriptNode.onaudioprocess = () => {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+                    let values = 0;
+                    for (let i = 0; i < array.length; i++) values += array[i];
+                    const decibels = Math.round(values / array.length);
+                    
+                    volumeDiv.textContent = `音量: ${decibels} dB`;
+                    
+                    // 数値入力欄から最新のしきい値を取得
+                    const currentThreshold = parseInt(volumeThresholdInput.value) || 0;
+                    volumeDiv.style.color = decibels > currentThreshold ? 'red' : 'black';
+
+                    if (!isProcessing && decibels > currentMaxVolume) {
+                        currentMaxVolume = decibels;
+                    }
+                };
+            }
+
+            startBtn.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    startAudio(stream);
+                    recognition.start();
+                    startBtn.disabled = true;
+                    startBtn.textContent = "実行中";
+                    outputDiv.textContent = "準備OK！話してください";
+                }).catch((err) => {
+                    console.error(err);
+                    alert('マイクの使用を許可してください。');
+                });
+            });
+
+            stopBtn.addEventListener('click', () => {
+                location.reload(); 
+            });
+        } else {
+            alert("このブラウザは音声認識に対応していません。Chromeをお試しください。");
+        }
+    </script>
+</body>
+</html>
